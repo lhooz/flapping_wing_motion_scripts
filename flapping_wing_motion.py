@@ -3,8 +3,8 @@
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 
-flapping_amplitude = 90
-pitching_amplitude = 90
+flapping_amplitude = 30
+pitching_amplitude = 10
 flapping_frequency = 0.1
 
 time_series_length = 1000
@@ -19,12 +19,15 @@ alf = (pitching_amplitude / 2) * np.sin(2 * np.pi * flapping_frequency * t +
                                         np.pi)
 # r = R.from_euler('zyx', [-30, -20, 0], degrees=True)
 # r = r.as_rotvec()
-
+# test_vector = [0, 1, 0]
 r_vector = []
 for phii, alfi in zip(phi, alf):
     euler_anglesi = [phii, alfi, 0]
 
-    roti = R.from_euler('zyx', euler_anglesi, degrees=True)
+    roti = R.from_euler('ZYX', euler_anglesi, degrees=True)
+    # result_vectori = roti.apply(test_vector)
+    # print(result_vectori[2])
+
     r_vectori = roti.as_rotvec() * 180 / np.pi
     r_vectori = [str(r_vectori[0]), str(r_vectori[1]), str(r_vectori[2])]
 
