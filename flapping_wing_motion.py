@@ -2,28 +2,32 @@
 
 import numpy as np
 from scipy.spatial.transform import Rotation as R
+import matplotlib.pyplot as plt
 
-flapping_amplitude = 120
-pitching_amplitude = 90
-flapping_frequency = 0.1
+flapping_amplitude = 80
+pitching_amplitude = 45
+flapping_frequency = 1
 
-time_series_length = 1000
+time_series_length = 10000
 start_time = 0
-end_time = 100
+end_time = 10
 
 t = np.linspace(start_time, end_time, time_series_length)
 
 
 def phi(x):
     """flapping motion function"""
-    return (flapping_amplitude /
-            2) * np.sin(2 * np.pi * flapping_frequency * x - np.pi / 2)
+    return flapping_amplitude * np.cos(2 * np.pi * flapping_frequency * x)
 
 
 def alf(x):
     """pitching motion function"""
-    return (pitching_amplitude /
-            2) * np.sin(2 * np.pi * flapping_frequency * x + np.pi)
+    return (pitching_amplitude / np.tanh(3.3)) * np.tanh(
+        3.3 * np.sin(2 * np.pi * flapping_frequency * x))
+
+
+# plt.plot(t, phi(t), t, alf(t))
+# plt.show()
 
 # r = R.from_euler('zyx', [-30, -20, 0], degrees=True)
 # r = r.as_rotvec()
@@ -32,7 +36,7 @@ r_angle = []
 for ti in t:
     euler_anglesi = [phi(ti), alf(ti), 0]
 
-    roti = R.from_euler('ZYX', euler_anglesi, degrees=True)
+    roti = R.from_euler('YXZ', euler_anglesi, degrees=True)
     # result_vectori = roti.apply(test_vector)
     # print(result_vectori[2])
 
@@ -43,7 +47,7 @@ for ti in t:
 
 t = [str(ti) for ti in t]
 
-motion = ['1000', '(']
+motion = [str(time_series_length), '(']
 for ti, angle_i in zip(t, r_angle):
     motioni = '(' + ti + ' ((0 0 0)' + '(' + ' '.join(angle_i) + ')))'
 
