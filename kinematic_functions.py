@@ -1,4 +1,4 @@
-"""kinematic functions definitions: default (smooth) and mostafa (sinusiodal)"""
+"""kinematic functions definitions: default (smooth) and sinusoidal (sinusiodal)"""
 
 import autograd.numpy as np
 import scipy.integrate as integrate
@@ -66,10 +66,10 @@ def smooth_kinematic_function(t, kinematic_parameters):
 # -------------------------------------------------
 
 
-# mostafa kinematic functions
+# sinusoidal kinematic functions
 # -------------------------------------------------
 def sinusoidal_kinematic_function(t, kinematic_parameters):
-    """definition for mostafa (sinusiodal) kinematic functiontion"""
+    """definition for sinusoidal (sinusiodal) kinematic functiontion"""
     flapping_wing_frequency = kinematic_parameters[0]
     flapping_angular_velocity_amplitude = kinematic_parameters[1]
     pitching_amplitude = kinematic_parameters[2]
@@ -118,7 +118,7 @@ def sinusoidal_kinematic_function(t, kinematic_parameters):
     return kinematic_angles
 
 
-    # original mostafa (sinusiodal) function
+    # original sinusoidal (sinusiodal) function
 def kf(f, amp, tr_fac, del_fac, t):
     """kinematic_function for flapping velocity and angle of attack"""
     T = 1 / f
@@ -127,24 +127,24 @@ def kf(f, amp, tr_fac, del_fac, t):
     beta = 1 - (2 * tr / T)
 
     t_T1 = 0
-    t_T2 = (T * (1 - beta) / 4) + delay
-    t_T3 = ((T * (1 + beta) / 4)) + delay
-    t_T4 = (T * (3 - beta) / 4) + delay
-    t_T5 = (T * (3 + beta) / 4) + delay
+    t_T2 = (T * (1 - beta) / 4)
+    t_T3 = ((T * (1 + beta) / 4))
+    t_T4 = (T * (3 - beta) / 4)
+    t_T5 = (T * (3 + beta) / 4)
     t_T6 = T
 
-    t = np.mod(t, T)
+    t = np.mod(t - delay, T)
     if t_T1 <= t < t_T2:
-        f_value = amp * np.sin((2 * np.pi * (t - delay)) / (T * (1 - beta)))
+        f_value = amp * np.sin((2 * np.pi * t) / (T * (1 - beta)))
     elif t_T2 <= t < t_T3:
         f_value = amp
     elif t_T3 <= t < t_T4:
         f_value = amp * np.sin(
-            (2 * np.pi * (t - delay - (beta * T / 2))) / (T * (1 - beta)))
+            (2 * np.pi * (t - (beta * T / 2))) / (T * (1 - beta)))
     elif t_T4 <= t < t_T5:
         f_value = -amp
     elif t_T5 <= t < t_T6:
-        f_value = -amp * np.sin((2 * np.pi * (t - delay - (beta * T / 2) -
+        f_value = -amp * np.sin((2 * np.pi * (t - (beta * T / 2) -
                                               (T / 2))) / (T * (1 - beta)))
     return f_value
     # ------------------------------------------

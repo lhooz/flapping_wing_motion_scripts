@@ -9,8 +9,8 @@ from kinematics_write import kf_plotter, write_2d, write_3d
 time_series_length = 10000
 start_time = 0
 end_time = 80
-use_function = 'smooth'
-# use_function = 'sinusoidal'
+# use_function = 'smooth'
+use_function = 'sinusoidal'
 
 # ----------------------------------------------
 # common kinematic parameters
@@ -18,8 +18,8 @@ flapping_wing_frequency = 0.1
 
 pitching_amplitude = 45
 
-flapping_delay_time_fraction = 0
-pitching_delay_time_fraction = 0
+flapping_delay_time_fraction = -0.1
+pitching_delay_time_fraction = -0.1
 
 section_location = 1
 # ----------------------------------------------
