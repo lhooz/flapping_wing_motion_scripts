@@ -50,11 +50,13 @@ def kf_plotter(x_array, y_arrays, legends):
     return fig
 
 
-def write_2d(t, section_location, flapping_wing_frequency, kinematic_angles):
+def write_2d(t, section_location, flapping_wing_frequency, kinematic_angles,
+             write_mode):
     """write kinematics data for 2d wing motion"""
     t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
     no_of_points_per_cycle = len(t_1st_cycle)
     time_series_length = len(t)
+    kinematic_angles = np.array(kinematic_angles)
 
     t_disp = []
     r_angle = []
@@ -63,11 +65,16 @@ def write_2d(t, section_location, flapping_wing_frequency, kinematic_angles):
 
         t_dispi = section_location * kinematic_angles[i_moded][0] * np.pi / 180
         t_dispi = [str(t_dispi), '0', '0']
-
         t_disp.append(t_dispi)
 
         # ----------------------------------------------
-        kinematic_anglesi = [0, 0, kinematic_angles[i_moded][1]]
+        if write_mode == 'zero_start' and i <= np.where(
+                kinematic_angles[:, 1] == np.amax(kinematic_angles[:, 1]))[0]:
+            pitch_anglei = np.amax(kinematic_angles[:, 1])
+        else:
+            pitch_anglei = kinematic_angles[i_moded][1]
+
+        kinematic_anglesi = [0, 0, pitch_anglei]
 
         roti = R.from_euler('YXZ', kinematic_anglesi, degrees=True)
 
@@ -92,18 +99,30 @@ def write_2d(t, section_location, flapping_wing_frequency, kinematic_angles):
             f.write("%s\n" % item)
 
 
-def write_3d(t, flapping_wing_frequency, kinematic_angles):
+def write_3d(t, flapping_wing_frequency, kinematic_angles, write_mode):
     """write kinematics data for 3d wing motion"""
     t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
     no_of_points_per_cycle = len(t_1st_cycle)
     time_series_length = len(t)
+    kinematic_angles = np.array(kinematic_angles)
 
+    t_disp = []
     r_angle = []
     for i in range(time_series_length):
         i_moded = np.mod(i, no_of_points_per_cycle)
-        kinematic_anglesi = [
-            kinematic_angles[i_moded][0], kinematic_angles[i_moded][1], 0
-        ]
+
+        t_dispi = ['0', '0', '0']
+        t_disp.append(t_dispi)
+
+        #----------------------------------------------------
+        if write_mode == 'zero_start' and i <= np.where(
+                kinematic_angles[:, 1] == np.amax(kinematic_angles[:, 1]))[0]:
+            pitch_anglei = np.amax(kinematic_angles[:, 1])
+            # print(kinematic_angles[:, 1])
+        else:
+            pitch_anglei = kinematic_angles[i_moded][1]
+
+        kinematic_anglesi = [kinematic_angles[i_moded][0], pitch_anglei, 0]
 
         roti = R.from_euler('YXZ', kinematic_anglesi, degrees=True)
 
@@ -115,8 +134,9 @@ def write_3d(t, flapping_wing_frequency, kinematic_angles):
     t = [str(ti) for ti in t]
 
     motion = [str(time_series_length), '(']
-    for ti, angle_i in zip(t, r_angle):
-        motioni = '(' + ti + ' ((0 0 0)' + '(' + ' '.join(angle_i) + ')))'
+    for ti, disp_i, angle_i in zip(t, t_disp, r_angle):
+        motioni = '(' + ti + ' ((' + ' '.join(disp_i) + ')' + '(' + ' '.join(
+            angle_i) + ')))'
 
         motion.append(motioni)
 
