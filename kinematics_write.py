@@ -69,7 +69,7 @@ def write_2d(t, section_location, flapping_wing_frequency, kinematic_angles,
 
         # ----------------------------------------------
         if write_mode == 'zero_start' and i <= np.where(
-                kinematic_angles[:, 1] == np.amax(kinematic_angles[:, 1]))[0]:
+                kinematic_angles[:, 1] == np.amax(kinematic_angles[:, 1]))[0][0]:
             pitch_anglei = np.amax(kinematic_angles[:, 1])
         else:
             pitch_anglei = kinematic_angles[i_moded][1]
@@ -116,7 +116,7 @@ def write_3d(t, flapping_wing_frequency, kinematic_angles, write_mode):
 
         #----------------------------------------------------
         if write_mode == 'zero_start' and i <= np.where(
-                kinematic_angles[:, 1] == np.amax(kinematic_angles[:, 1]))[0]:
+                kinematic_angles[:, 1] == np.amax(kinematic_angles[:, 1]))[0][0]:
             pitch_anglei = np.amax(kinematic_angles[:, 1])
             # print(kinematic_angles[:, 1])
         else:

@@ -8,15 +8,15 @@ from kinematics_write import kf_plotter, write_2d, write_3d
 # sinumation time definition and choose functions to use
 time_series_length = 10000
 start_time = 0
-end_time = 18
-use_function = 'smooth'
-# use_function = 'sinusoidal'
+end_time = 180
+# use_function = 'smooth'
+use_function = 'sinusoidal'
 # write_mode = 'original'
 write_mode = 'zero_start'
 
 # ----------------------------------------------
 # common kinematic parameters
-flapping_wing_frequency = 1
+flapping_wing_frequency = 0.1
 
 pitching_amplitude = 45
 
@@ -60,7 +60,7 @@ elif use_function == 'sinusoidal':
 # plotting kinematic angles
 t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
 # angles_to_plot = ['phi', 'dphi', 'alf', 'dalf']
-angles_to_plot = ['phi', 'alf']
+angles_to_plot = ['dphi', 'dalf']
 
 kf_plotter(t_1st_cycle, kinematic_angles, angles_to_plot)
 # ----------------------------------------------
