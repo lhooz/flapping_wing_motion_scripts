@@ -69,9 +69,12 @@ def write_2d(t, section_location, time_series_length_per_cycle, kinematic_angles
     kinematic_angles = np.array(kinematic_angles)
 
     initial_phi = kinematic_angles[0][0]
+    initial_alf = kinematic_angles[0][1]
     for i in range(no_of_points_per_cycle):
         kinematic_angles[i][
             0] = kinematic_angles[i][0] - initial_phi
+        kinematic_angles[i][
+            1] = kinematic_angles[i][1] - initial_alf
 
     t_disp = []
     r_angle = []
@@ -87,7 +90,7 @@ def write_2d(t, section_location, time_series_length_per_cycle, kinematic_angles
 
         kinematic_anglesi = [0, 0, pitch_anglei]
 
-        roti = R.from_euler('YXZ', kinematic_anglesi, degrees=True)
+        roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
 
         r_anglei = roti.as_euler('XYZ', degrees=True)
         r_anglei = [str(r_anglei[0]), str(r_anglei[1]), str(r_anglei[2])]
@@ -117,9 +120,12 @@ def write_3d(t, time_series_length_per_cycle, kinematic_angles):
     kinematic_angles = np.array(kinematic_angles)
 
     initial_phi = kinematic_angles[0][0]
+    initial_alf = kinematic_angles[0][1]
     for i in range(no_of_points_per_cycle):
         kinematic_angles[i][
             0] = kinematic_angles[i][0] - initial_phi
+        kinematic_angles[i][
+            1] = kinematic_angles[i][1] - initial_alf
 
     t_disp = []
     r_angle = []
@@ -134,7 +140,7 @@ def write_3d(t, time_series_length_per_cycle, kinematic_angles):
 
         kinematic_anglesi = [kinematic_angles[i_moded][0], pitch_anglei, 0]
 
-        roti = R.from_euler('YXZ', kinematic_anglesi, degrees=True)
+        roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
 
         r_anglei = roti.as_euler('XYZ', degrees=True)
         r_anglei = [str(r_anglei[0]), str(r_anglei[1]), str(r_anglei[2])]
@@ -155,3 +161,9 @@ def write_3d(t, time_series_length_per_cycle, kinematic_angles):
     with open('6DoF_3d.dat', 'w') as f:
         for item in motion:
             f.write("%s\n" % item)
+
+def write_iaoa(kinematic_angles):
+    """write pitch angle at 1st step"""
+
+    with open('iaoa.dat', 'w') as f:
+        f.write("%s\n" % kinematic_angles[0][1])

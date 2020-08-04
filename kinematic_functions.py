@@ -144,7 +144,7 @@ def kf(f, amp, tr_fac, del_fac, t):
     elif t_T4 <= t < t_T5:
         f_value = -amp
     elif t_T5 <= t < t_T6:
-        f_value = -amp * np.sin((2 * np.pi * (t - (beta * T / 2) -
-                                              (T / 2))) / (T * (1 - beta)))
+        f_value = -amp * np.sin(
+            (2 * np.pi * (t - (beta * T / 2) - (T / 2))) / (T * (1 - beta)))
     return f_value
     # ------------------------------------------

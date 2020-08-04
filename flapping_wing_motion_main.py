@@ -3,12 +3,12 @@
 import numpy as np
 from kinematic_functions import smooth_kinematic_function as sm_f
 from kinematic_functions import sinusoidal_kinematic_function as si_f
-from kinematics_write import kf_plotter, write_2d, write_3d
+from kinematics_write import kf_plotter, write_2d, write_3d, write_iaoa
 
 # sinumation time definition and choose functions to use
 time_series_length_per_cycle = 1000
 start_time = 0
-number_of_cycles = 3
+number_of_cycles = 10
 use_function = 'smooth'
 # use_function = 'sinusoidal'
 
@@ -19,7 +19,7 @@ flapping_wing_frequency = 1
 pitching_amplitude = 45
 
 flapping_delay_time_fraction = 0
-pitching_delay_time_fraction = 0
+pitching_delay_time_fraction = 0.0444
 
 section_location = 1
 # ----------------------------------------------
@@ -30,7 +30,7 @@ flapping_acceleration_time_coefficient = 0.97  # between 0 and 1
 pitching_time_coefficient = 3  # between 0 and inf
 
 # additional kinematic control parameters for sinusoidal functions
-flapping_angular_velocity_amplitude = 0.5 * 180 / np.pi
+flapping_angular_velocity_amplitude = 5 * 180 / np.pi
 
 flapping_acceleration_time_fraction = 0.24
 pitching_time_fraction = 0.24
@@ -67,3 +67,4 @@ kf_plotter(t, kinematic_angles, time_series_length_per_cycle, angles_to_plot)
 # ----------------------------------------------
 write_2d(t, section_location, time_series_length_per_cycle, kinematic_angles)
 write_3d(t, time_series_length_per_cycle, kinematic_angles)
+write_iaoa(kinematic_angles)
