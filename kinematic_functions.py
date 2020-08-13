@@ -17,6 +17,7 @@ def smooth_kinematic_function(t, kinematic_parameters):
     pitching_time_coefficient = kinematic_parameters[4]
     flapping_delay_time_fraction = kinematic_parameters[5]
     pitching_delay_time_fraction = kinematic_parameters[6]
+    ptf_coefficient = kinematic_parameters[7]
 
     def phi(x):
         """flapping motion function"""
@@ -42,6 +43,14 @@ def smooth_kinematic_function(t, kinematic_parameters):
             alft = pitching_amplitude * np.sin(
                 2 * np.pi * flapping_wing_frequency *
                 (x - pitching_delay_time_fraction / flapping_wing_frequency))
+        elif pitching_time_coefficient == 'f':
+
+            ptc_x = ptf_function(x)
+
+            alft = pitching_amplitude / np.tanh(ptc_x) * np.tanh(
+                ptc_x * np.sin(2 * np.pi * flapping_wing_frequency *
+                               (x - pitching_delay_time_fraction /
+                                flapping_wing_frequency)))
         else:
             alft = pitching_amplitude / np.tanh(
                 pitching_time_coefficient
@@ -53,6 +62,12 @@ def smooth_kinematic_function(t, kinematic_parameters):
     def dalf(x):
         """flapping angular velocity function"""
         return grad(alf)(x)
+
+    def ptf_function(x):
+        """time varying pitching time coefficient function"""
+        return ptf_coefficient + ptf_coefficient * (np.sin(
+            2 * np.pi * flapping_wing_frequency *
+            (x - pitching_delay_time_fraction / flapping_wing_frequency)))**2
 
     kinematic_angles = []
     t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]

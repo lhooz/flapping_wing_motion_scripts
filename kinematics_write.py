@@ -35,7 +35,7 @@ def kf_plotter(t, kinematic_angles, time_series_length_per_cycle, legends):
 
     y_arrays = np.zeros((time_series_length, 4))
     for i in range(time_series_length):
-        i_moded = np.mod(i, no_of_points_per_cycle -1)
+        i_moded = np.mod(i, no_of_points_per_cycle - 1)
 
         y_arrays[i][0] = kinematic_angles[i_moded][0]
         y_arrays[i][1] = kinematic_angles[i_moded][1]
@@ -53,7 +53,7 @@ def kf_plotter(t, kinematic_angles, time_series_length_per_cycle, legends):
             ax.plot(t, y_arrays[:, 3], label='dalf')
 
     ax.set_xlabel('t (seconds)')
-    ax.set_ylabel('angle (degrees)')
+    ax.set_ylabel('angle/angular_vel (degs/degs_per_sec)')
     ax.set_title('kinematics plot')
     ax.legend()
 
@@ -62,7 +62,8 @@ def kf_plotter(t, kinematic_angles, time_series_length_per_cycle, legends):
     return fig
 
 
-def write_2d(t, section_location, time_series_length_per_cycle, kinematic_angles):
+def write_2d(t, section_location, time_series_length_per_cycle,
+             kinematic_angles):
     """write kinematics data for 2d wing motion"""
     no_of_points_per_cycle = time_series_length_per_cycle
     time_series_length = len(t)
@@ -71,15 +72,13 @@ def write_2d(t, section_location, time_series_length_per_cycle, kinematic_angles
     initial_phi = kinematic_angles[0][0]
     initial_alf = kinematic_angles[0][1]
     for i in range(no_of_points_per_cycle):
-        kinematic_angles[i][
-            0] = kinematic_angles[i][0] - initial_phi
-        kinematic_angles[i][
-            1] = kinematic_angles[i][1] - initial_alf
+        kinematic_angles[i][0] = kinematic_angles[i][0] - initial_phi
+        kinematic_angles[i][1] = kinematic_angles[i][1] - initial_alf
 
     t_disp = []
     r_angle = []
     for i in range(time_series_length):
-        i_moded = np.mod(i, no_of_points_per_cycle -1)
+        i_moded = np.mod(i, no_of_points_per_cycle - 1)
 
         t_dispi = section_location * kinematic_angles[i_moded][0] * np.pi / 180
         t_dispi = [str(t_dispi), '0', '0']
@@ -122,15 +121,13 @@ def write_3d(t, time_series_length_per_cycle, kinematic_angles):
     initial_phi = kinematic_angles[0][0]
     initial_alf = kinematic_angles[0][1]
     for i in range(no_of_points_per_cycle):
-        kinematic_angles[i][
-            0] = kinematic_angles[i][0] - initial_phi
-        kinematic_angles[i][
-            1] = kinematic_angles[i][1] - initial_alf
+        kinematic_angles[i][0] = kinematic_angles[i][0] - initial_phi
+        kinematic_angles[i][1] = kinematic_angles[i][1] - initial_alf
 
     t_disp = []
     r_angle = []
     for i in range(time_series_length):
-        i_moded = np.mod(i, no_of_points_per_cycle -1)
+        i_moded = np.mod(i, no_of_points_per_cycle - 1)
 
         t_dispi = ['0', '0', '0']
         t_disp.append(t_dispi)
@@ -162,8 +159,19 @@ def write_3d(t, time_series_length_per_cycle, kinematic_angles):
         for item in motion:
             f.write("%s\n" % item)
 
+
 def write_iaoa(kinematic_angles):
     """write pitch angle at 1st step"""
 
     with open('iaoa.dat', 'w') as f:
         f.write("%s\n" % kinematic_angles[0][1])
+
+
+def write_max_dphi(kinematic_angles):
+    """write maximum flapping angular velocity"""
+
+    kinematic_angles = np.array(kinematic_angles)
+    mdphi = np.amax(kinematic_angles[:, 2])
+
+    with open('max_dphi.dat', 'w') as f:
+        f.write("%s\n" % mdphi)
