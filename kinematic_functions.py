@@ -81,6 +81,83 @@ def smooth_kinematic_function(t, kinematic_parameters):
 # -------------------------------------------------
 
 
+# sinu_continuous kinematic functions
+# -------------------------------------------------
+def sinu_continuous_kinematic_function(t, kinematic_parameters):
+    """definition for sinusoidal (sinusiodal) kinematic functiontion"""
+    flapping_wing_frequency = kinematic_parameters[0]
+    flapping_angular_velocity_amplitude = kinematic_parameters[1]
+    pitching_angular_velocity_amplitude = kinematic_parameters[2]
+    flapping_acceleration_time_fraction = kinematic_parameters[3]
+    pitching_time_fraction = kinematic_parameters[4]
+    flapping_delay_time_fraction = kinematic_parameters[5]
+    pitching_delay_time_fraction = kinematic_parameters[6]
+
+    def dphi(x):
+        """flapping motion angular velocity function"""
+        return -kf(
+            flapping_wing_frequency, flapping_angular_velocity_amplitude,
+            flapping_acceleration_time_fraction, flapping_delay_time_fraction,
+            x)
+
+    flapping_amplitude = integrate.quad(lambda x: np.abs(dphi(x)), 0,
+                                        1 / flapping_wing_frequency)[0]
+    print(flapping_amplitude / 2)
+
+    initial_phi = integrate.quad(
+        lambda x: dphi(x), 0,
+        np.abs(flapping_delay_time_fraction) / flapping_wing_frequency)[0]
+    initial_phi = -np.sign(flapping_delay_time_fraction) * initial_phi
+
+    dphi_int = []
+    for ti in t:
+        dphi_int.append(dphi(ti))
+
+    def phi(x):
+        """flapping motion function"""
+        t_int = [tx for tx in t if tx <= x]
+        time_array_length = len(t_int)
+        # print(time_array_length, dphi_int[0:time_array_length])
+        return flapping_amplitude / 4 + initial_phi + integrate.simps(
+            dphi_int[0:time_array_length], t_int)
+
+    def dalf(x):
+        """flapping angular velocity function"""
+        return kf_continuous(flapping_wing_frequency,
+                             pitching_angular_velocity_amplitude,
+                             pitching_time_fraction,
+                             pitching_delay_time_fraction, x)
+
+    pitching_amplitude = integrate.quad(lambda x: np.abs(dalf(x)), 0,
+                                        1 / flapping_wing_frequency)[0]
+    print(pitching_amplitude / 2)
+
+    initial_alf = integrate.quad(
+        lambda x: dalf(x), 0,
+        np.abs(pitching_delay_time_fraction) / flapping_wing_frequency)[0]
+    initial_alf = -np.sign(pitching_delay_time_fraction) * initial_alf
+
+    dalf_int = []
+    for ti in t:
+        dalf_int.append(dalf(ti))
+
+    def alf(x):
+        """pitching motion function"""
+        t_int = [tx for tx in t if tx <= x]
+        time_array_length = len(t_int)
+        # print(time_array_length, dphi_int[0:time_array_length])
+        return initial_alf + integrate.simps(dalf_int[0:time_array_length],
+                                             t_int)
+
+    kinematic_angles = []
+    t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
+    for ti in t_1st_cycle:
+        kinematic_anglesi = [phi(ti), alf(ti), dphi(ti), dalf(ti)]
+        kinematic_angles.append(kinematic_anglesi)
+
+    return kinematic_angles
+
+
 # sinusoidal kinematic functions
 # -------------------------------------------------
 def sinusoidal_kinematic_function(t, kinematic_parameters):
@@ -102,6 +179,12 @@ def sinusoidal_kinematic_function(t, kinematic_parameters):
 
     flapping_amplitude = integrate.quad(lambda x: np.abs(dphi(x)), 0,
                                         1 / flapping_wing_frequency)[0]
+    print(flapping_amplitude / 2)
+
+    initial_phi = integrate.quad(
+        lambda x: dphi(x), 0,
+        np.abs(flapping_delay_time_fraction) / flapping_wing_frequency)[0]
+    initial_phi = -np.sign(flapping_delay_time_fraction) * initial_phi
 
     dphi_int = []
     for ti in t:
@@ -112,7 +195,7 @@ def sinusoidal_kinematic_function(t, kinematic_parameters):
         t_int = [tx for tx in t if tx <= x]
         time_array_length = len(t_int)
         # print(time_array_length, dphi_int[0:time_array_length])
-        return flapping_amplitude / 4 + integrate.simps(
+        return flapping_amplitude / 4 + initial_phi + integrate.simps(
             dphi_int[0:time_array_length], t_int)
 
     def alf(x):
@@ -143,7 +226,7 @@ def kf(f, amp, tr_fac, del_fac, t):
 
     t_T1 = 0
     t_T2 = (T * (1 - beta) / 4)
-    t_T3 = ((T * (1 + beta) / 4))
+    t_T3 = (T * (1 + beta) / 4)
     t_T4 = (T * (3 - beta) / 4)
     t_T5 = (T * (3 + beta) / 4)
     t_T6 = T
@@ -159,7 +242,40 @@ def kf(f, amp, tr_fac, del_fac, t):
     elif t_T4 <= t < t_T5:
         f_value = -amp
     elif t_T5 <= t < t_T6:
-        f_value = -amp * np.sin(
-            (2 * np.pi * (t - (beta * T / 2) - (T / 2))) / (T * (1 - beta)))
+        f_value = amp * np.sin((2 * np.pi * (t - beta * T)) / (T * (1 - beta)))
+    return f_value
+    # ------------------------------------------
+
+
+    # original sinusoidal (sinusiodal) function
+def kf_continuous(f, amp, tr_fac, del_fac, t):
+    """kinematic_function for flapping velocity and angle of attack"""
+    T = 1 / f
+    T_sinu = 0.5 * T
+    delay = del_fac * T
+    tr = tr_fac * T
+    beta = 1 - (2 * tr / T)
+
+    t_T1 = 0
+    t_T2 = (T * (1 - beta) / 4)
+    t_T3 = (T * (1 + beta) / 4)
+    t_T4 = (T * (3 - beta) / 4)
+    t_T5 = (T * (3 + beta) / 4)
+    t_T6 = T
+
+    t = np.mod(t - delay, T)
+    if t_T1 <= t < t_T2:
+        f_value = amp / 2 + amp / 2 * np.cos(
+            (2 * np.pi * t) / (T_sinu * (1 - beta)))
+    elif t_T2 <= t < t_T3:
+        f_value = 0
+    elif t_T3 <= t < t_T4:
+        f_value = -amp / 2 - amp / 2 * np.cos(
+            (2 * np.pi * (t - (beta * T / 2))) / (T_sinu * (1 - beta)))
+    elif t_T4 <= t < t_T5:
+        f_value = 0
+    elif t_T5 <= t < t_T6:
+        f_value = amp / 2 + amp / 2 * np.cos(
+            (2 * np.pi * (t - beta * T)) / (T_sinu * (1 - beta)))
     return f_value
     # ------------------------------------------
