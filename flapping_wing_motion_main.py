@@ -7,9 +7,9 @@ from kinematic_functions import sinusoidal_kinematic_function as si_f
 from kinematics_write import kf_plotter, write_2d, write_3d, write_iaoa, write_max_dphi
 
 # sinumation time definition and choose functions to use
-time_series_length_per_cycle = 2000
+time_series_length_per_cycle = 2001
 start_time = 0
-number_of_cycles = 6
+number_of_cycles = 1
 # use_function = 'smooth'
 use_function = 'sinu_continuous'
 # use_function = 'sinusoidal'
@@ -32,18 +32,18 @@ pitching_time_coefficient = 'f'  # between 0 and inf or use ptf_function 'f'
 ptf_coefficient = 1.6  # used when pitching_time_coefficient = 'f'
 # ----------------------------------------------
 # additional kinematic control parameters for sinu_continuous functions
-flapping_angular_velocity_amplitude_c = 5.06 * 180 / np.pi
-pitching_angular_velocity_amplitude_c = 833
+flapping_angular_velocity_amplitude = 263  # --degree/s--
+pitching_angular_velocity_amplitude = 751  # --degree/s--
 
-flapping_acceleration_time_fraction_c = 0.24
-pitching_time_fraction_c = 0.24
+flapping_acceleration_time_fraction = 0.12
+pitching_time_fraction = 0.24
 # ---------------------------------------------
 # additional kinematic control parameters for sinusoidal functions
-flapping_angular_velocity_amplitude = 5 * 180 / np.pi
-pitching_amplitude = 50
+flapping_angular_velocity_amplitude_sin = 291
+pitching_amplitude_sin = 50
 
-flapping_acceleration_time_fraction = 0.24
-pitching_time_fraction = 0.24
+flapping_acceleration_time_fraction_sin = 0.24
+pitching_time_fraction_sin = 0.24
 # ----------------------------------------------
 t1 = np.linspace(start_time, 1 / flapping_wing_frequency,
                  time_series_length_per_cycle)
@@ -58,15 +58,15 @@ kinematic_parameters_smooth = [
     flapping_delay_time_fraction, pitching_delay_time_fraction, ptf_coefficient
 ]
 kinematic_parameters_sinu_continuous = [
-    flapping_wing_frequency, flapping_angular_velocity_amplitude_c,
-    pitching_angular_velocity_amplitude_c,
-    flapping_acceleration_time_fraction_c, pitching_time_fraction_c,
-    flapping_delay_time_fraction, pitching_delay_time_fraction
+    flapping_wing_frequency, flapping_angular_velocity_amplitude,
+    pitching_angular_velocity_amplitude, flapping_acceleration_time_fraction,
+    pitching_time_fraction, flapping_delay_time_fraction,
+    pitching_delay_time_fraction
 ]
 kinematic_parameters_sinusoidal = [
-    flapping_wing_frequency, flapping_angular_velocity_amplitude,
-    pitching_amplitude, flapping_acceleration_time_fraction,
-    pitching_time_fraction, flapping_delay_time_fraction,
+    flapping_wing_frequency, flapping_angular_velocity_amplitude_sin,
+    pitching_amplitude_sin, flapping_acceleration_time_fraction_sin,
+    pitching_time_fraction_sin, flapping_delay_time_fraction,
     pitching_delay_time_fraction
 ]
 
@@ -77,10 +77,9 @@ elif use_function == 'sinu_continuous':
 elif use_function == 'sinusoidal':
     kinematic_angles = si_f(t, kinematic_parameters_sinusoidal)
 
-print(len(kinematic_angles))
 # plotting kinematic angles
-angles_to_plot = ['phi', 'dphi', 'alf', 'dalf']
-# angles_to_plot = ['dphi', 'dalf']
+# angles_to_plot = ['phi', 'dphi', 'alf', 'dalf']
+angles_to_plot = ['dphi', 'dalf']
 
 kf_plotter(t, kinematic_angles, time_series_length_per_cycle, angles_to_plot)
 # ----------------------------------------------

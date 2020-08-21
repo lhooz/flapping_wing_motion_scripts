@@ -102,7 +102,7 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
 
     flapping_amplitude = integrate.quad(lambda x: np.abs(dphi(x)), 0,
                                         1 / flapping_wing_frequency)[0]
-    print(flapping_amplitude / 2)
+    print('flapping amplitude = %s' % (flapping_amplitude / 2))
 
     initial_phi = integrate.quad(
         lambda x: dphi(x), 0,
@@ -130,7 +130,7 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
 
     pitching_amplitude = integrate.quad(lambda x: np.abs(dalf(x)), 0,
                                         1 / flapping_wing_frequency)[0]
-    print(pitching_amplitude / 2)
+    print('pitching amplitude = %s' % (pitching_amplitude / 2))
 
     initial_alf = integrate.quad(
         lambda x: dalf(x), 0,
@@ -179,7 +179,7 @@ def sinusoidal_kinematic_function(t, kinematic_parameters):
 
     flapping_amplitude = integrate.quad(lambda x: np.abs(dphi(x)), 0,
                                         1 / flapping_wing_frequency)[0]
-    print(flapping_amplitude / 2)
+    print('flapping amplitude = %s' % (flapping_amplitude / 2))
 
     initial_phi = integrate.quad(
         lambda x: dphi(x), 0,
