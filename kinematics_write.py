@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation as R
 
 
-def kf_plotter(t, kinematic_angles, time_series_length_per_cycle, legends):
+def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle):
     """
     A helper function to make a graph
 
@@ -29,7 +29,10 @@ def kf_plotter(t, kinematic_angles, time_series_length_per_cycle, legends):
     kinematic_angles = np.array(kinematic_angles)
 
     time_series_length = len(t)
-    no_of_points_per_cycle = time_series_length_per_cycle
+    if time_series_length_per_cycle == 'revolving':
+        no_of_points_per_cycle = time_series_length + 1
+    else:
+        no_of_points_per_cycle = time_series_length_per_cycle
 
     fig, ax = plt.subplots(1, 1)
 
@@ -62,18 +65,21 @@ def kf_plotter(t, kinematic_angles, time_series_length_per_cycle, legends):
     return fig
 
 
-def write_2d(t, section_location, time_series_length_per_cycle,
-             kinematic_angles):
+def write_2d(t, section_location, kinematic_angles,
+             time_series_length_per_cycle):
     """write kinematics data for 2d wing motion"""
-    no_of_points_per_cycle = time_series_length_per_cycle
-    time_series_length = len(t)
     kinematic_angles = np.array(kinematic_angles)
+    time_series_length = len(t)
+    if time_series_length_per_cycle == 'revolving':
+        no_of_points_per_cycle = time_series_length + 1
+    else:
+        no_of_points_per_cycle = time_series_length_per_cycle
 
-    initial_phi = kinematic_angles[0][0]
-    initial_alf = kinematic_angles[0][1]
-    for i in range(no_of_points_per_cycle):
-        kinematic_angles[i][0] = kinematic_angles[i][0] - initial_phi
-        kinematic_angles[i][1] = kinematic_angles[i][1] - initial_alf
+        initial_phi = kinematic_angles[0][0]
+        initial_alf = kinematic_angles[0][1]
+        for i in range(no_of_points_per_cycle):
+            kinematic_angles[i][0] = kinematic_angles[i][0] - initial_phi
+            kinematic_angles[i][1] = kinematic_angles[i][1] - initial_alf
 
     t_disp = []
     r_angle = []
@@ -89,9 +95,10 @@ def write_2d(t, section_location, time_series_length_per_cycle,
 
         kinematic_anglesi = [0, 0, pitch_anglei]
 
-        roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
+        # roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
+        # r_anglei = roti.as_euler('XYZ', degrees=True)
+        r_anglei = kinematic_anglesi
 
-        r_anglei = roti.as_euler('XYZ', degrees=True)
         r_anglei = [str(r_anglei[0]), str(r_anglei[1]), str(r_anglei[2])]
 
         r_angle.append(r_anglei)
@@ -112,17 +119,20 @@ def write_2d(t, section_location, time_series_length_per_cycle,
             f.write("%s\n" % item)
 
 
-def write_3d(t, time_series_length_per_cycle, kinematic_angles):
+def write_3d(t, kinematic_angles, time_series_length_per_cycle):
     """write kinematics data for 3d wing motion"""
-    no_of_points_per_cycle = time_series_length_per_cycle
-    time_series_length = len(t)
     kinematic_angles = np.array(kinematic_angles)
+    time_series_length = len(t)
+    if time_series_length_per_cycle == 'revolving':
+        no_of_points_per_cycle = time_series_length + 1
+    else:
+        no_of_points_per_cycle = time_series_length_per_cycle
 
-    initial_phi = kinematic_angles[0][0]
-    initial_alf = kinematic_angles[0][1]
-    for i in range(no_of_points_per_cycle):
-        kinematic_angles[i][0] = kinematic_angles[i][0] - initial_phi
-        kinematic_angles[i][1] = kinematic_angles[i][1] - initial_alf
+        initial_phi = kinematic_angles[0][0]
+        initial_alf = kinematic_angles[0][1]
+        for i in range(no_of_points_per_cycle):
+            kinematic_angles[i][0] = kinematic_angles[i][0] - initial_phi
+            kinematic_angles[i][1] = kinematic_angles[i][1] - initial_alf
 
     t_disp = []
     r_angle = []
@@ -137,9 +147,10 @@ def write_3d(t, time_series_length_per_cycle, kinematic_angles):
 
         kinematic_anglesi = [kinematic_angles[i_moded][0], pitch_anglei, 0]
 
-        roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
+        # roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
+        # r_anglei = roti.as_euler('XYZ', degrees=True)
+        r_anglei = kinematic_anglesi
 
-        r_anglei = roti.as_euler('XYZ', degrees=True)
         r_anglei = [str(r_anglei[0]), str(r_anglei[1]), str(r_anglei[2])]
 
         r_angle.append(r_anglei)

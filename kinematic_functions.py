@@ -279,3 +279,49 @@ def kf_continuous(f, amp, tr_fac, del_fac, t):
             (2 * np.pi * (t - beta * T)) / (T_sinu * (1 - beta)))
     return f_value
     # ------------------------------------------
+
+
+    # revolving wing kinematics with sinusiodal ramp function
+def sinu_ramp_rev(t, kinematic_parameters):
+    """revolving wing kinematics function with sinusoidal ramp at start"""
+    steady_rotation_frequency = kinematic_parameters[0]
+    initial_ramp_time = kinematic_parameters[1]
+
+    steady_rotation_omega = 360 * steady_rotation_frequency
+    omega_print = steady_rotation_omega * np.pi / 180
+    print('steady revolving omega = %s' % omega_print)
+
+    def omega(x):
+        """rotation speed function"""
+        if x <= initial_ramp_time:
+            omega = steady_rotation_omega / 2 + steady_rotation_omega / 2 * np.sin(
+                2 * np.pi * x / (2 * initial_ramp_time) - np.pi / 2)
+        else:
+            omega = steady_rotation_omega
+
+        return omega
+
+    ramp_angle = integrate.quad(lambda x: np.abs(omega(x)), 0,
+                                initial_ramp_time)[0]
+    print('inirial ramp angle = %s' % ramp_angle)
+
+    omega_int = []
+    for ti in t:
+        omega_int.append(omega(ti))
+
+    def phi(x):
+        """rotation angle function"""
+        if x <= initial_ramp_time:
+            t_int = [tx for tx in t if tx <= x]
+            time_array_length = len(t_int)
+            # print(time_array_length, dphi_int[0:time_array_length])
+            return integrate.simps(omega_int[0:time_array_length], t_int)
+        else:
+            return ramp_angle + steady_rotation_omega * (x - initial_ramp_time)
+
+    kinematic_angles = []
+    for ti in t:
+        kinematic_anglesi = [phi(ti), 0, omega(ti), 0]
+        kinematic_angles.append(kinematic_anglesi)
+
+    return kinematic_angles
