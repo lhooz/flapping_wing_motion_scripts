@@ -8,11 +8,11 @@ from kinematics_write import kf_plotter, write_2d, write_3d
 ramp_time_series_length = 100
 steady_rotation_time_series_length = 5000
 start_time = 0
-initial_ramp_time = 0.1
-steady_rotation_time = 4.5
+initial_ramp_time = 6.4
+steady_rotation_time = 10.5
 ramp_function = 'sinu_ramp'
 #------------------------------
-steady_rotation_frequency = 1
+steady_rotation_frequency = 0.078
 section_location = 1  #used only for 2d cases
 #------------------------------
 end_time = start_time + initial_ramp_time + steady_rotation_time
@@ -29,9 +29,9 @@ kinematic_parameters = [steady_rotation_frequency, initial_ramp_time]
 if ramp_function == 'sinu_ramp':
     kinematic_angles = sinu_ramp_rev(t, kinematic_parameters)
 #--------------------------------------------------
-angles_to_plot = ['phi', 'dphi']
+angles_to_plot = ['dphi', 'ddphi']
 
-kf_plotter(t, kinematic_angles, angles_to_plot, 'revolving')
+kf_plotter(t, kinematic_angles, angles_to_plot, 'revolving', 'against_phi')
 
 write_2d(t, section_location, kinematic_angles, 'revolving')
 write_3d(t, kinematic_angles, 'revolving')

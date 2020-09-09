@@ -1,11 +1,13 @@
 """script for writing kinematic functions to openfoam format"""
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation as R
 
 
-def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle):
+def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
+               h_axis):
     """
     A helper function to make a graph
 
@@ -20,13 +22,19 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle):
     legends : list
        list of data name for each y array
 
-    Returns
-    -------
-    out : list
-        list of artists added
+    time_series_length_per_cycle: number or 'revolving'
+        flapping wing cases use number for length of time series per flapping cycle
+        revolving wing cases use 'revolving' keyword to indicate
+
+    h_axis: 'against_t' or 'against_phi'
+        'against_t' for use time as horizontal axis
+        'against_phi' for use stroke angle as horizontal axis
+
     """
+    cwd = os.getcwd()
     t = np.array(t)
     kinematic_angles = np.array(kinematic_angles)
+    l_width = 1.5
 
     time_series_length = len(t)
     if time_series_length_per_cycle == 'revolving':
@@ -36,7 +44,7 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle):
 
     fig, ax = plt.subplots(1, 1)
 
-    y_arrays = np.zeros((time_series_length, 4))
+    y_arrays = np.zeros((time_series_length, 6))
     for i in range(time_series_length):
         i_moded = np.mod(i, no_of_points_per_cycle - 1)
 
@@ -44,22 +52,97 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle):
         y_arrays[i][1] = kinematic_angles[i_moded][1]
         y_arrays[i][2] = kinematic_angles[i_moded][2]
         y_arrays[i][3] = kinematic_angles[i_moded][3]
+        y_arrays[i][4] = kinematic_angles[i_moded][4]
+        y_arrays[i][5] = kinematic_angles[i_moded][5]
 
-    for legend in legends:
-        if legend == 'phi':
-            ax.plot(t, y_arrays[:, 0], label='phi')
-        elif legend == 'alf':
-            ax.plot(t, y_arrays[:, 1], label='alf')
-        elif legend == 'dphi':
-            ax.plot(t, y_arrays[:, 2], label='dphi')
-        elif legend == 'dalf':
-            ax.plot(t, y_arrays[:, 3], label='dalf')
+    if h_axis == 'against_t':
+        for legend in legends:
+            if legend == 'phi':
+                ax.plot(t,
+                        y_arrays[:, 0],
+                        linestyle='solid',
+                        linewidth=l_width,
+                        label=r'$\phi$')
+            elif legend == 'alf':
+                ax.plot(t,
+                        y_arrays[:, 1],
+                        linestyle='solid',
+                        linewidth=l_width,
+                        label=r'$\alf$')
+            elif legend == 'dphi':
+                ax.plot(t,
+                        y_arrays[:, 2],
+                        linestyle='dashed',
+                        linewidth=l_width,
+                        label=r'$\dot\phi$')
+            elif legend == 'dalf':
+                ax.plot(t,
+                        y_arrays[:, 3],
+                        linestyle='dashed',
+                        linewidth=l_width,
+                        label=r'$\dot\alf$')
+            elif legend == 'ddphi':
+                ax.plot(t,
+                        y_arrays[:, 4],
+                        linestyle='dashdot',
+                        linewidth=l_width,
+                        label=r'$\ddot\phi$')
+            elif legend == 'ddalf':
+                ax.plot(t,
+                        y_arrays[:, 5],
+                        linestyle='dashdot',
+                        linewidth=l_width,
+                        label=r'$\ddot\alf$')
 
-    ax.set_xlabel('t (seconds)')
-    ax.set_ylabel('angle/angular_vel (degs/degs_per_sec)')
+        ax.set_xlabel('t (s)')
+        ax.set_ylabel(r'$\phi, \dot\phi, \ddot\phi\/(\deg, \deg/s, \deg/s^2)$')
+    elif h_axis == 'against_phi':
+        x = y_arrays[:, 0]
+        for legend in legends:
+            if legend == 'phi':
+                ax.plot(x,
+                        y_arrays[:, 0],
+                        linestyle='solid',
+                        linewidth=l_width,
+                        label=r'$\phi$')
+            elif legend == 'alf':
+                ax.plot(x,
+                        y_arrays[:, 1],
+                        linestyle='solid',
+                        linewidth=l_width,
+                        label=r'$\alf$')
+            elif legend == 'dphi':
+                ax.plot(x,
+                        y_arrays[:, 2],
+                        linestyle='dashed',
+                        linewidth=l_width,
+                        label=r'$\dot\phi$')
+            elif legend == 'dalf':
+                ax.plot(x,
+                        y_arrays[:, 3],
+                        linestyle='dashed',
+                        linewidth=l_width,
+                        label=r'$\dot\alf$')
+            elif legend == 'ddphi':
+                ax.plot(x,
+                        y_arrays[:, 4],
+                        linestyle='dashdot',
+                        linewidth=l_width,
+                        label=r'$\ddot\phi$')
+            elif legend == 'ddalf':
+                ax.plot(x,
+                        y_arrays[:, 5],
+                        linestyle='dashdot',
+                        linewidth=l_width,
+                        label=r'$\ddot\alf$')
+
+        ax.set_xlabel(r'$\phi\/(\deg)$')
+        ax.set_ylabel(r'$\.\phi, \ddot\phi\/(\deg/s, \deg/s^2)$')
     ax.set_title('kinematics plot')
     ax.legend()
 
+    out_figure_file = os.path.join(cwd, 'kinematics_plot.png')
+    fig.savefig(out_figure_file)
     plt.show()
 
     return fig

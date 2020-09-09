@@ -1,4 +1,4 @@
-"""kinematic functions definitions: default (smooth) and sinusoidal (sinusiodal)"""
+"""kinematic functions defknitions: default (smooth) and sinusoidal (sinusiodal)"""
 
 import autograd.numpy as np
 import scipy.integrate as integrate
@@ -37,6 +37,10 @@ def smooth_kinematic_function(t, kinematic_parameters):
         """flapping angular velocity function"""
         return grad(phi)(x)
 
+    def ddphi(x):
+        """flapping angular acceleration function"""
+        return derivative(dphi, x, dx=1e-6)
+
     def alf(x):
         """pitching motion function"""
         if pitching_time_coefficient == 0:
@@ -63,6 +67,10 @@ def smooth_kinematic_function(t, kinematic_parameters):
         """flapping angular velocity function"""
         return grad(alf)(x)
 
+    def ddalf(x):
+        """pitching angular acceleration function"""
+        return derivative(dalf, x, dx=1e-6)
+
     def ptf_function(x):
         """time varying pitching time coefficient function"""
         return ptf_coefficient + ptf_coefficient * (np.sin(
@@ -72,7 +80,14 @@ def smooth_kinematic_function(t, kinematic_parameters):
     kinematic_angles = []
     t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
     for ti in t_1st_cycle:
-        kinematic_anglesi = [phi(ti), alf(ti), dphi(ti), dalf(ti)]
+        kinematic_anglesi = [
+            phi(ti),
+            alf(ti),
+            dphi(ti),
+            dalf(ti),
+            ddphi(ti),
+            ddalf(ti)
+        ]
         kinematic_angles.append(kinematic_anglesi)
 
     return kinematic_angles
@@ -104,6 +119,10 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
                                         1 / flapping_wing_frequency)[0]
     print('flapping amplitude = %s' % (flapping_amplitude / 2))
 
+    def ddphi(x):
+        """flapping angular acceleration function"""
+        return derivative(dphi, x, dx=1e-6)
+
     initial_phi = integrate.quad(
         lambda x: dphi(x), 0,
         np.abs(flapping_delay_time_fraction) / flapping_wing_frequency)[0]
@@ -132,6 +151,10 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
                                         1 / flapping_wing_frequency)[0]
     print('pitching amplitude = %s' % (pitching_amplitude / 2))
 
+    def ddalf(x):
+        """pitching angular acceleration function"""
+        return derivative(dalf, x, dx=1e-6)
+
     initial_alf = integrate.quad(
         lambda x: dalf(x), 0,
         np.abs(pitching_delay_time_fraction) / flapping_wing_frequency)[0]
@@ -152,7 +175,14 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
     kinematic_angles = []
     t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
     for ti in t_1st_cycle:
-        kinematic_anglesi = [phi(ti), alf(ti), dphi(ti), dalf(ti)]
+        kinematic_anglesi = [
+            phi(ti),
+            alf(ti),
+            dphi(ti),
+            dalf(ti),
+            ddphi(ti),
+            ddalf(ti)
+        ]
         kinematic_angles.append(kinematic_anglesi)
 
     return kinematic_angles
@@ -181,6 +211,10 @@ def sinusoidal_kinematic_function(t, kinematic_parameters):
                                         1 / flapping_wing_frequency)[0]
     print('flapping amplitude = %s' % (flapping_amplitude / 2))
 
+    def ddphi(x):
+        """flapping angular acceleration function"""
+        return derivative(dphi, x, dx=1e-6)
+
     initial_phi = integrate.quad(
         lambda x: dphi(x), 0,
         np.abs(flapping_delay_time_fraction) / flapping_wing_frequency)[0]
@@ -204,13 +238,24 @@ def sinusoidal_kinematic_function(t, kinematic_parameters):
                   pitching_time_fraction, pitching_delay_time_fraction, x)
 
     def dalf(x):
-        """flapping angular velocity function"""
+        """pitching angular velocity function"""
         return derivative(alf, x, dx=1e-6)
+
+    def ddalf(x):
+        """pitching angular acceleration function"""
+        return derivative(dalf, x, dx=1e-6)
 
     kinematic_angles = []
     t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
     for ti in t_1st_cycle:
-        kinematic_anglesi = [phi(ti), alf(ti), dphi(ti), dalf(ti)]
+        kinematic_anglesi = [
+            phi(ti),
+            alf(ti),
+            dphi(ti),
+            dalf(ti),
+            ddphi(ti),
+            ddalf(ti)
+        ]
         kinematic_angles.append(kinematic_anglesi)
 
     return kinematic_angles
@@ -301,6 +346,10 @@ def sinu_ramp_rev(t, kinematic_parameters):
 
         return omega
 
+    def ddphi(x):
+        """flapping angular acceleration function"""
+        return derivative(omega, x, dx=1e-6)
+
     ramp_angle = integrate.quad(lambda x: np.abs(omega(x)), 0,
                                 initial_ramp_time)[0]
     print('inirial ramp angle = %s' % ramp_angle)
@@ -321,7 +370,7 @@ def sinu_ramp_rev(t, kinematic_parameters):
 
     kinematic_angles = []
     for ti in t:
-        kinematic_anglesi = [phi(ti), 0, omega(ti), 0]
+        kinematic_anglesi = [phi(ti), 0, omega(ti), 0, ddphi(ti), 0]
         kinematic_angles.append(kinematic_anglesi)
 
     return kinematic_angles
