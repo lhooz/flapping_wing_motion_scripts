@@ -11,12 +11,12 @@ time_series_length_per_cycle = 2001
 start_time = 0
 number_of_cycles = 1
 # use_function = 'smooth'
-use_function = 'sinu_continuous'
-# use_function = 'sinusoidal'
+# use_function = 'sinu_continuous'
+use_function = 'sinusoidal'
 
 # ----------------------------------------------
 # common kinematic parameters
-flapping_wing_frequency = 1
+flapping_wing_frequency = 0.05
 
 flapping_delay_time_fraction = 0
 pitching_delay_time_fraction = 0
@@ -35,15 +35,15 @@ ptf_coefficient = 1.6  # used when pitching_time_coefficient = 'f'
 flapping_angular_velocity_amplitude = 263  # --degree/s--
 pitching_angular_velocity_amplitude = 751  # --degree/s--
 
-flapping_acceleration_time_fraction = 0.12
-pitching_time_fraction = 0.24
+flapping_acceleration_time_fraction = 0.5
+pitching_time_fraction = 0.5
 # ---------------------------------------------
 # additional kinematic control parameters for sinusoidal functions
-flapping_angular_velocity_amplitude_sin = 291
-pitching_amplitude_sin = 50
+flapping_angular_velocity_amplitude_sin = 28.27
+pitching_amplitude_sin = 45
 
-flapping_acceleration_time_fraction_sin = 0.24
-pitching_time_fraction_sin = 0.24
+flapping_acceleration_time_fraction_sin = 0.5
+pitching_time_fraction_sin = 0.5
 # ----------------------------------------------
 t1 = np.linspace(start_time, 1 / flapping_wing_frequency,
                  time_series_length_per_cycle)
@@ -79,11 +79,12 @@ elif use_function == 'sinusoidal':
 
 # plotting kinematic angles
 # angles_to_plot = ['phi', 'dphi', 'alf', 'dalf']
-angles_to_plot = ['dphi', 'dalf']
+angles_to_plot = ['dphi', 'dalf', 'ddphi']
 
-kf_plotter(t, kinematic_angles, time_series_length_per_cycle, angles_to_plot)
+kf_plotter(t, kinematic_angles, angles_to_plot, time_series_length_per_cycle,
+           'against_t')
 # ----------------------------------------------
-write_2d(t, section_location, time_series_length_per_cycle, kinematic_angles)
-write_3d(t, time_series_length_per_cycle, kinematic_angles)
+write_2d(t, section_location, kinematic_angles, time_series_length_per_cycle)
+write_3d(t, kinematic_angles, time_series_length_per_cycle)
 write_iaoa(kinematic_angles)
 write_max_dphi(kinematic_angles)

@@ -55,6 +55,7 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
         y_arrays[i][4] = kinematic_angles[i_moded][4]
         y_arrays[i][5] = kinematic_angles[i_moded][5]
 
+    y_label = []
     if h_axis == 'against_t':
         for legend in legends:
             if legend == 'phi':
@@ -63,39 +64,45 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
                         linestyle='solid',
                         linewidth=l_width,
                         label=r'$\phi$')
+                y_label.append(r'\phi')
             elif legend == 'alf':
                 ax.plot(t,
                         y_arrays[:, 1],
                         linestyle='solid',
                         linewidth=l_width,
-                        label=r'$\alf$')
+                        label=r'$\alpha$')
+                y_label.append(r'\alpha')
             elif legend == 'dphi':
                 ax.plot(t,
                         y_arrays[:, 2],
                         linestyle='dashed',
                         linewidth=l_width,
                         label=r'$\dot\phi$')
+                y_label.append(r'\dot\phi')
             elif legend == 'dalf':
                 ax.plot(t,
                         y_arrays[:, 3],
                         linestyle='dashed',
                         linewidth=l_width,
-                        label=r'$\dot\alf$')
+                        label=r'$\dot\alpha$')
+                y_label.append(r'\dot\alpha')
             elif legend == 'ddphi':
                 ax.plot(t,
                         y_arrays[:, 4],
                         linestyle='dashdot',
                         linewidth=l_width,
                         label=r'$\ddot\phi$')
+                y_label.append(r'\ddot\phi')
             elif legend == 'ddalf':
                 ax.plot(t,
                         y_arrays[:, 5],
                         linestyle='dashdot',
                         linewidth=l_width,
-                        label=r'$\ddot\alf$')
+                        label=r'$\ddot\alpha$')
+                y_label.append(r'\ddot\alpha')
 
         ax.set_xlabel('t (s)')
-        ax.set_ylabel(r'$\phi, \dot\phi, \ddot\phi\/(\deg, \deg/s, \deg/s^2)$')
+
     elif h_axis == 'against_phi':
         x = y_arrays[:, 0]
         for legend in legends:
@@ -105,39 +112,56 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
                         linestyle='solid',
                         linewidth=l_width,
                         label=r'$\phi$')
+                y_label.append(r'\phi')
             elif legend == 'alf':
                 ax.plot(x,
                         y_arrays[:, 1],
                         linestyle='solid',
                         linewidth=l_width,
-                        label=r'$\alf$')
+                        label=r'$\alpha$')
+                y_label.append(r'\alpha')
             elif legend == 'dphi':
                 ax.plot(x,
                         y_arrays[:, 2],
                         linestyle='dashed',
                         linewidth=l_width,
                         label=r'$\dot\phi$')
+                y_label.append(r'\dot\phi')
             elif legend == 'dalf':
                 ax.plot(x,
                         y_arrays[:, 3],
                         linestyle='dashed',
                         linewidth=l_width,
-                        label=r'$\dot\alf$')
+                        label=r'$\dot\alpha$')
+                y_label.append(r'\dot\alpha')
             elif legend == 'ddphi':
                 ax.plot(x,
                         y_arrays[:, 4],
                         linestyle='dashdot',
                         linewidth=l_width,
                         label=r'$\ddot\phi$')
+                y_label.append(r'\ddot\phi')
             elif legend == 'ddalf':
                 ax.plot(x,
                         y_arrays[:, 5],
                         linestyle='dashdot',
                         linewidth=l_width,
-                        label=r'$\ddot\alf$')
+                        label=r'$\ddot\alpha$')
+                y_label.append(r'\ddot\alpha')
 
         ax.set_xlabel(r'$\phi\/(\deg)$')
-        ax.set_ylabel(r'$\.\phi, \ddot\phi\/(\deg/s, \deg/s^2)$')
+
+    y_label_units = []
+    if 'phi' in legends or 'alf' in legends:
+        y_label_units.append(r'\deg')
+    if 'dphi' in legends or 'dalf' in legends:
+        y_label_units.append(r'\deg/s')
+    if 'ddphi' in legends or 'ddalf' in legends:
+        y_label_units.append(r'\deg/s^2')
+
+    y_label_str = r'$' + ',\/'.join(y_label) + r'\/(' + ',\/'.join(
+        y_label_units) + r')' + r'$'
+    ax.set_ylabel(y_label_str)
     ax.set_title('kinematics plot')
     ax.legend()
 

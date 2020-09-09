@@ -8,8 +8,8 @@ from kinematics_write import kf_plotter, write_2d, write_3d
 ramp_time_series_length = 100
 steady_rotation_time_series_length = 5000
 start_time = 0
-initial_ramp_time = 6.4
-steady_rotation_time = 10.5
+initial_ramp_time = 6.45
+steady_rotation_time = 1.5
 ramp_function = 'sinu_ramp'
 #------------------------------
 steady_rotation_frequency = 0.078
