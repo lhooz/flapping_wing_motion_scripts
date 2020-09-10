@@ -38,6 +38,7 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
 
     time_series_length = len(t)
     if time_series_length_per_cycle == 'revolving':
+        kinematic_angles = kinematic_angles * -1
         no_of_points_per_cycle = time_series_length + 1
     else:
         no_of_points_per_cycle = time_series_length_per_cycle
@@ -200,7 +201,7 @@ def write_2d(t, section_location, kinematic_angles,
         # ----------------------------------------------
         pitch_anglei = kinematic_angles[i_moded][1]
 
-        kinematic_anglesi = [0, 0, pitch_anglei]
+        kinematic_anglesi = [0, 0, pitch_anglei]  #--pitch about z axis--
 
         # roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
         # r_anglei = roti.as_euler('XYZ', degrees=True)

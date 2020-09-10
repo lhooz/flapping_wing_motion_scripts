@@ -370,7 +370,7 @@ def sinu_ramp_rev(t, kinematic_parameters):
 
     kinematic_angles = []
     for ti in t:
-        kinematic_anglesi = [phi(ti), 0, omega(ti), 0, ddphi(ti), 0]
+        kinematic_anglesi = [-phi(ti), 0, -omega(ti), 0, -ddphi(ti), 0]
         kinematic_angles.append(kinematic_anglesi)
 
     return kinematic_angles
