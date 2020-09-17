@@ -352,7 +352,7 @@ def sinu_ramp_rev(t, kinematic_parameters):
 
     ramp_angle = integrate.quad(lambda x: np.abs(omega(x)), 0,
                                 initial_ramp_time)[0]
-    print('inirial ramp angle = %s' % ramp_angle)
+    print('initial sinu ramp angle = %s' % ramp_angle)
 
     omega_int = []
     for ti in t:
@@ -367,6 +367,68 @@ def sinu_ramp_rev(t, kinematic_parameters):
             return integrate.simps(omega_int[0:time_array_length], t_int)
         else:
             return ramp_angle + steady_rotation_omega * (x - initial_ramp_time)
+
+    kinematic_angles = []
+    for ti in t:
+        kinematic_anglesi = [-phi(ti), 0, -omega(ti), 0, -ddphi(ti), 0]
+        kinematic_angles.append(kinematic_anglesi)
+
+    return kinematic_angles
+
+
+#---linear ramp function smoothed at conner for revolving or 2d translating wing--
+def smooth_linear_ramp(t, kinematic_parameters):
+    """smoothed linear ramp function"""
+    ramp_stage_acceleration = kinematic_parameters[0]
+    ramp_start_time = kinematic_parameters[1]
+    i_ramp_end_time = kinematic_parameters[2]
+    steady_end_time = kinematic_parameters[3]
+    end_ramp_end_time = kinematic_parameters[4]
+    smooth_factor = kinematic_parameters[5]
+    ramp_mode = kinematic_parameters[6]
+    ramp_constant_time = kinematic_parameters[7]
+
+    def omega(x):
+        """linear ramp rotation speed function"""
+        if x <= end_ramp_end_time + 2 * ramp_constant_time:
+            f_t0 = np.cosh(smooth_factor * (x - ramp_start_time))
+            f_t1 = np.cosh(smooth_factor * (x - i_ramp_end_time))
+            f_t2 = np.cosh(smooth_factor * (x - steady_end_time))
+            f_t3 = np.cosh(smooth_factor * (x - end_ramp_end_time))
+
+            omegax = (ramp_stage_acceleration / 2) / smooth_factor * np.log(
+                f_t0 / f_t1 * f_t3 / f_t2)
+        else:
+            omegax = 0
+
+        return omegax
+
+    steady_rotation_omega = omega((i_ramp_end_time + steady_end_time) / 2)
+    omega_print = steady_rotation_omega * np.pi / 180
+    print('steady revolving omega = %s' % omega_print)
+
+    def ddphi(x):
+        """flapping angular acceleration function"""
+        return derivative(omega, x, dx=1e-6)
+
+    ramp_angle = integrate.quad(lambda x: np.abs(omega(x)), ramp_start_time,
+                                i_ramp_end_time)[0]
+    print('initial linear ramp angle = %s' % ramp_angle)
+
+    if ramp_mode == 'with_end_acc':
+        end_ramp_angle = integrate.quad(lambda x: np.abs(omega(x)),
+                                        steady_end_time, end_ramp_end_time)[0]
+        print('end linear ramp angle = %s' % end_ramp_angle)
+
+    omega_int = []
+    for ti in t:
+        omega_int.append(omega(ti))
+
+    def phi(x):
+        """rotation angle function"""
+        t_int = [tx for tx in t if tx <= x]
+        time_array_length = len(t_int)
+        return integrate.simps(omega_int[0:time_array_length], t_int)
 
     kinematic_angles = []
     for ti in t:
