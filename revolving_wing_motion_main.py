@@ -9,8 +9,8 @@ from kinematics_write import kf_plotter, write_2d, write_3d
 ramp_time_series_length = 100
 steady_rotation_time_series_length = 1000
 start_time = 0
-initial_ramp_time = 0.1
-steady_rotation_time = 0.8
+initial_ramp_time = 1
+steady_rotation_time = 3
 #------------------------------
 steady_rotation_frequency = 1  #--not used for smooth_linear_ramp func--
 section_location = 1  #used only for 2d cases
@@ -19,14 +19,14 @@ section_location = 1  #used only for 2d cases
 ramp_function = 'smooth_linear_ramp'
 #------------------------------
 #--additional parameters for smooth_linear_ramp function---
+ramp_stage_acceleration = 400
 #-conner smoothing parameter, higher indicates shorter smooth range--
-ramp_stage_acceleration = 2146
-smooth_factor = 500
+smooth_factor = 50
 #--ramp initial zero velocity time relative to total ramp time--
 ramp_constant_v_length = 0.1
 #-decelleration process of wing motion--
-ramp_mode = 'with_end_acc'
-# ramp_mode = 'no_end_acc'
+# ramp_mode = 'with_end_acc'
+ramp_mode = 'no_end_acc'
 #-zero velocity time after the wing stoped--
 end_constant_time = 2.1
 end_c_time_series_length = 2100
@@ -41,9 +41,6 @@ t = np.append(t_ramp, t_rev)
 if ramp_function == 'smooth_linear_ramp':
     end_ramp_time = initial_ramp_time
     ramp_constant_time = ramp_constant_v_length * initial_ramp_time
-
-    if ramp_mode == 'no_end_acc':
-        steady_end_time += ramp_constant_time
 
     ramp_start_time = start_time + ramp_constant_time
     end_ramp_end_time = steady_end_time + end_ramp_time - ramp_constant_time

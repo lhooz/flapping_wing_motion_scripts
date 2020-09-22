@@ -393,8 +393,12 @@ def smooth_linear_ramp(t, kinematic_parameters):
         if x <= end_ramp_end_time + 2 * ramp_constant_time:
             f_t0 = np.cosh(smooth_factor * (x - ramp_start_time))
             f_t1 = np.cosh(smooth_factor * (x - i_ramp_end_time))
-            f_t2 = np.cosh(smooth_factor * (x - steady_end_time))
-            f_t3 = np.cosh(smooth_factor * (x - end_ramp_end_time))
+            if ramp_mode == 'with_end_acc':
+                f_t2 = np.cosh(smooth_factor * (x - steady_end_time))
+                f_t3 = np.cosh(smooth_factor * (x - end_ramp_end_time))
+            elif ramp_mode == 'no_end_acc':
+                f_t2 = np.cosh(smooth_factor * (ramp_start_time))
+                f_t3 = np.cosh(smooth_factor * (i_ramp_end_time))
 
             omegax = (ramp_stage_acceleration / 2) / smooth_factor * np.log(
                 f_t0 / f_t1 * f_t3 / f_t2)
