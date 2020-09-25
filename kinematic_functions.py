@@ -387,6 +387,11 @@ def smooth_linear_ramp(t, kinematic_parameters):
     smooth_factor = kinematic_parameters[5]
     ramp_mode = kinematic_parameters[6]
     ramp_constant_time = kinematic_parameters[7]
+    pitch_mode = kinematic_parameters[8]
+    pitch_time = kinematic_parameters[9]
+    pitch_delay_time_fraction = kinematic_parameters[10]
+    pitch_acceleration = kinematic_parameters[11]
+    pitch_acc_time_fraction = kinematic_parameters[12]
 
     def omega(x):
         """linear ramp rotation speed function"""
@@ -397,8 +402,8 @@ def smooth_linear_ramp(t, kinematic_parameters):
                 f_t2 = np.cosh(smooth_factor * (x - steady_end_time))
                 f_t3 = np.cosh(smooth_factor * (x - end_ramp_end_time))
             elif ramp_mode == 'no_end_acc':
-                f_t2 = np.cosh(smooth_factor * (ramp_start_time))
-                f_t3 = np.cosh(smooth_factor * (i_ramp_end_time))
+                f_t2 = np.cosh(smooth_factor * ramp_start_time)
+                f_t3 = np.cosh(smooth_factor * i_ramp_end_time)
 
             omegax = (ramp_stage_acceleration / 2) / smooth_factor * np.log(
                 f_t0 / f_t1 * f_t3 / f_t2)
@@ -415,13 +420,15 @@ def smooth_linear_ramp(t, kinematic_parameters):
         """flapping angular acceleration function"""
         return derivative(omega, x, dx=1e-6)
 
-    ramp_angle = integrate.quad(lambda x: np.abs(omega(x)), ramp_start_time,
-                                i_ramp_end_time)[0]
+    ramp_angle = integrate.quad(lambda x: np.abs(omega(x)),
+                                ramp_start_time - ramp_constant_time,
+                                i_ramp_end_time + ramp_constant_time)[0]
     print('initial linear ramp angle = %s' % ramp_angle)
 
     if ramp_mode == 'with_end_acc':
-        end_ramp_angle = integrate.quad(lambda x: np.abs(omega(x)),
-                                        steady_end_time, end_ramp_end_time)[0]
+        end_ramp_angle = integrate.quad(
+            lambda x: np.abs(omega(x)), steady_end_time - ramp_constant_time,
+            end_ramp_end_time + ramp_constant_time)[0]
         print('end linear ramp angle = %s' % end_ramp_angle)
 
     omega_int = []
@@ -434,9 +441,62 @@ def smooth_linear_ramp(t, kinematic_parameters):
         time_array_length = len(t_int)
         return integrate.simps(omega_int[0:time_array_length], t_int)
 
+    if pitch_mode == 'with_end_pitch':
+        pitch_delay_time = pitch_time * pitch_delay_time_fraction
+        pitch_acc_time = pitch_time * pitch_acc_time_fraction / 2
+
+        pitch_start_time = end_ramp_end_time - pitch_time + pitch_delay_time
+        p_acc_end_time = pitch_start_time + pitch_acc_time
+        pitch_end_time = pitch_start_time + pitch_time
+        p_decc_start_time = pitch_end_time - pitch_acc_time
+
+        def dalf(x):
+            """linear ramp pitch speed function"""
+            if x <= pitch_end_time + 2 * ramp_constant_time and x >= pitch_start_time - 2 * ramp_constant_time:
+                f_t0 = np.cosh(smooth_factor * (x - pitch_start_time))
+                f_t1 = np.cosh(smooth_factor * (x - p_acc_end_time))
+                f_t2 = np.cosh(smooth_factor * (x - p_decc_start_time))
+                f_t3 = np.cosh(smooth_factor * (x - pitch_end_time))
+
+                dalfx = (pitch_acceleration / 2) / smooth_factor * np.log(
+                    f_t0 / f_t1 * f_t3 / f_t2)
+            else:
+                dalfx = 0
+
+            return dalfx
+
+        steady_pitching_omega = dalf((pitch_start_time + pitch_end_time) / 2)
+        omega_print = steady_pitching_omega * np.pi / 180
+        print('steady wing pitch omega = %s' % omega_print)
+
+        def ddalf(x):
+            """flapping angular acceleration function"""
+            return derivative(dalf, x, dx=1e-6)
+
+        pitch_angle = integrate.quad(lambda x: np.abs(dalf(x)),
+                                     pitch_start_time - ramp_constant_time,
+                                     pitch_end_time + ramp_constant_time)[0]
+        print('wing pitch angle = %s' % pitch_angle)
+
+        dalf_int = []
+        for ti in t:
+            dalf_int.append(dalf(ti))
+
+        def alf(x):
+            """rotation angle function"""
+            t_int = [tx for tx in t if tx <= x]
+            time_array_length = len(t_int)
+            return integrate.simps(dalf_int[0:time_array_length], t_int)
+
     kinematic_angles = []
     for ti in t:
-        kinematic_anglesi = [-phi(ti), 0, -omega(ti), 0, -ddphi(ti), 0]
+        if pitch_mode == 'no_end_pitch':
+            kinematic_anglesi = [-phi(ti), 0, -omega(ti), 0, -ddphi(ti), 0]
+        elif pitch_mode == 'with_end_pitch':
+            kinematic_anglesi = [
+                -phi(ti), -alf(ti), -omega(ti), -dalf(ti), -ddphi(ti),
+                -ddalf(ti)
+            ]
         kinematic_angles.append(kinematic_anglesi)
 
     return kinematic_angles

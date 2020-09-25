@@ -22,9 +22,9 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
     legends : list
        list of data name for each y array
 
-    time_series_length_per_cycle: number or 'revolving'
+    time_series_length_per_cycle: number or 'basic'
         flapping wing cases use number for length of time series per flapping cycle
-        revolving wing cases use 'revolving' keyword to indicate
+        basic kinematic cases use 'basic' keyword to indicate
 
     h_axis: 'against_t' or 'against_phi'
         'against_t' for use time as horizontal axis
@@ -37,7 +37,7 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
     l_width = 1.5
 
     time_series_length = len(t)
-    if time_series_length_per_cycle == 'revolving':
+    if time_series_length_per_cycle == 'basic':
         kinematic_angles = kinematic_angles * -1
         no_of_points_per_cycle = time_series_length + 1
     else:
@@ -178,7 +178,7 @@ def write_2d(t, section_location, kinematic_angles,
     """write kinematics data for 2d wing motion"""
     kinematic_angles = np.array(kinematic_angles)
     time_series_length = len(t)
-    if time_series_length_per_cycle == 'revolving':
+    if time_series_length_per_cycle == 'basic':
         no_of_points_per_cycle = time_series_length + 1
     else:
         no_of_points_per_cycle = time_series_length_per_cycle
@@ -231,7 +231,7 @@ def write_3d(t, kinematic_angles, time_series_length_per_cycle):
     """write kinematics data for 3d wing motion"""
     kinematic_angles = np.array(kinematic_angles)
     time_series_length = len(t)
-    if time_series_length_per_cycle == 'revolving':
+    if time_series_length_per_cycle == 'basic':
         no_of_points_per_cycle = time_series_length + 1
     else:
         no_of_points_per_cycle = time_series_length_per_cycle

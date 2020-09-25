@@ -9,28 +9,46 @@ from kinematics_write import kf_plotter, write_2d, write_3d
 ramp_time_series_length = 100
 steady_rotation_time_series_length = 1000
 start_time = 0
-initial_ramp_time = 1
-steady_rotation_time = 3
+steady_rotation_time = 8
 #------------------------------
-steady_rotation_frequency = 1  #--not used for smooth_linear_ramp func--
 section_location = 1  #used only for 2d cases
 #------------------------------
 # ramp_function = 'sinu_ramp'
 ramp_function = 'smooth_linear_ramp'
 #------------------------------
-#--additional parameters for smooth_linear_ramp function---
-ramp_stage_acceleration = 400
+#--parameter for sinusoidal ramp_function---
+steady_rotation_frequency = 1
+initial_ramp_time = 1
+#-------------------------------------------
+#-------------------------------------------
+#--parameters for smooth_linear_ramp function---
+ramp_stage_acceleration = 20
 #-conner smoothing parameter, higher indicates shorter smooth range--
 smooth_factor = 50
-#--ramp initial zero velocity time relative to total ramp time--
-ramp_constant_v_length = 0.1
+#--ramp time and initial zero velocity time--
+ramp_time = 0.95
+ramp_constant_time = 0.05
+#----------------------------------------
 #-decelleration process of wing motion--
-# ramp_mode = 'with_end_acc'
-ramp_mode = 'no_end_acc'
+ramp_mode = 'with_end_acc'
+# ramp_mode = 'no_end_acc'
+#----------------------------------------
+#-wing pitching mode at decelleration phase--
+# pitch_mode = 'with_end_pitch' #--used when ramp mode with_end_acc
+pitch_mode = 'no_end_pitch'
+pitch_acceleration = 400
+pitch_time = 0.9
+pitch_acc_time_fraction = 0.2  #--relative to pitch time: 0 ~ 1
+pitch_delay_time_fraction = 0
+#----------------------------------------
 #-zero velocity time after the wing stoped--
-end_constant_time = 2.1
+end_constant_time = 2
 end_c_time_series_length = 2100
 #------------------------------
+#------------------------------
+if ramp_function == 'smooth_linear_ramp':
+    initial_ramp_time = ramp_time + ramp_constant_time
+
 i_ramp_end_time = start_time + initial_ramp_time
 steady_end_time = i_ramp_end_time + steady_rotation_time
 t_ramp = np.linspace(start_time, i_ramp_end_time, ramp_time_series_length)
@@ -40,7 +58,6 @@ t_rev = np.delete(t_rev, 0)
 t = np.append(t_ramp, t_rev)
 if ramp_function == 'smooth_linear_ramp':
     end_ramp_time = initial_ramp_time
-    ramp_constant_time = ramp_constant_v_length * initial_ramp_time
 
     ramp_start_time = start_time + ramp_constant_time
     end_ramp_end_time = steady_end_time + end_ramp_time - ramp_constant_time
@@ -69,13 +86,17 @@ elif ramp_function == 'smooth_linear_ramp':
     kinematic_parameters = [
         ramp_stage_acceleration, ramp_start_time, i_ramp_end_time,
         steady_end_time, end_ramp_end_time, smooth_factor, ramp_mode,
-        ramp_constant_time
+        ramp_constant_time, pitch_mode, pitch_time, pitch_delay_time_fraction,
+        pitch_acceleration, pitch_acc_time_fraction
     ]
     kinematic_angles = smooth_linear_ramp(t, kinematic_parameters)
+
+st_dist = np.abs(kinematic_angles[-1][0]) * np.pi / 180 * section_location
+print('2d wing travel distance = %s' % st_dist)
 #--------------------------------------------------
 angles_to_plot = ['dphi', 'ddphi']
 
-kf_plotter(t, kinematic_angles, angles_to_plot, 'revolving', 'against_t')
+kf_plotter(t, kinematic_angles, angles_to_plot, 'basic', 'against_t')
 
-write_2d(t, section_location, kinematic_angles, 'revolving')
-write_3d(t, kinematic_angles, 'revolving')
+write_2d(t, section_location, kinematic_angles, 'basic')
+write_3d(t, kinematic_angles, 'basic')
