@@ -392,6 +392,7 @@ def smooth_linear_ramp(t, kinematic_parameters):
     pitch_delay_time_fraction = kinematic_parameters[10]
     pitch_acceleration = kinematic_parameters[11]
     pitch_acc_time_fraction = kinematic_parameters[12]
+    section_location = kinematic_parameters[13]
 
     def omega(x):
         """linear ramp rotation speed function"""
@@ -441,6 +442,10 @@ def smooth_linear_ramp(t, kinematic_parameters):
         time_array_length = len(t_int)
         return integrate.simps(omega_int[0:time_array_length], t_int)
 
+    st_dist = np.abs(phi(t[-1])) * np.pi / 180 * section_location
+    print('2d wing travel distance = %s\n' % st_dist)
+
+    #--pitching motion functions--
     if pitch_mode == 'with_end_pitch':
         pitch_delay_time = pitch_time * pitch_delay_time_fraction
         pitch_acc_time = pitch_time * pitch_acc_time_fraction / 2
@@ -473,11 +478,6 @@ def smooth_linear_ramp(t, kinematic_parameters):
             """flapping angular acceleration function"""
             return derivative(dalf, x, dx=1e-6)
 
-        pitch_angle = integrate.quad(lambda x: np.abs(dalf(x)),
-                                     pitch_start_time - ramp_constant_time,
-                                     pitch_end_time + ramp_constant_time)[0]
-        print('wing pitch angle = %s' % pitch_angle)
-
         dalf_int = []
         for ti in t:
             dalf_int.append(dalf(ti))
@@ -487,6 +487,8 @@ def smooth_linear_ramp(t, kinematic_parameters):
             t_int = [tx for tx in t if tx <= x]
             time_array_length = len(t_int)
             return integrate.simps(dalf_int[0:time_array_length], t_int)
+
+        print('wing pitch angle = %s' % alf(t[-1]))
 
     kinematic_angles = []
     for ti in t:
