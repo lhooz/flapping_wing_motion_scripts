@@ -1,5 +1,7 @@
 """kinematic functions defknitions: default (smooth) and sinusoidal (sinusiodal)"""
 
+import csv
+
 import autograd.numpy as np
 import scipy.integrate as integrate
 from autograd import grad
@@ -394,20 +396,26 @@ def smooth_linear_ramp(t, kinematic_parameters):
     pitch_acc_time_fraction = kinematic_parameters[12]
     section_location = kinematic_parameters[13]
 
+    def logcosh(x):
+        # s always has real part >= 0
+        s = np.sign(x) * x
+        p = np.exp(-2 * s)
+        return s + np.log1p(p) - np.log(2)
+
     def omega(x):
         """linear ramp rotation speed function"""
         if x <= end_ramp_end_time + 2 * ramp_constant_time:
-            f_t0 = np.cosh(smooth_factor * (x - ramp_start_time))
-            f_t1 = np.cosh(smooth_factor * (x - i_ramp_end_time))
+            f_t0 = smooth_factor * (x - ramp_start_time)
+            f_t1 = smooth_factor * (x - i_ramp_end_time)
             if ramp_mode == 'with_end_acc':
-                f_t2 = np.cosh(smooth_factor * (x - steady_end_time))
-                f_t3 = np.cosh(smooth_factor * (x - end_ramp_end_time))
+                f_t2 = smooth_factor * (x - steady_end_time)
+                f_t3 = smooth_factor * (x - end_ramp_end_time)
             elif ramp_mode == 'no_end_acc':
-                f_t2 = np.cosh(smooth_factor * ramp_start_time)
-                f_t3 = np.cosh(smooth_factor * i_ramp_end_time)
+                f_t2 = smooth_factor * ramp_start_time
+                f_t3 = smooth_factor * i_ramp_end_time
 
-            omegax = (ramp_stage_acceleration / 2) / smooth_factor * np.log(
-                f_t0 / f_t1 * f_t3 / f_t2)
+            omegax = (ramp_stage_acceleration / 2) / smooth_factor * (
+                logcosh(f_t0) - logcosh(f_t1) + logcosh(f_t3) - logcosh(f_t2))
         else:
             omegax = 0
 
@@ -421,29 +429,48 @@ def smooth_linear_ramp(t, kinematic_parameters):
         """flapping angular acceleration function"""
         return derivative(omega, x, dx=1e-6)
 
-    ramp_angle = integrate.quad(lambda x: np.abs(omega(x)),
-                                ramp_start_time - ramp_constant_time,
-                                i_ramp_end_time + ramp_constant_time)[0]
-    print('initial linear ramp angle = %s' % ramp_angle)
-
-    if ramp_mode == 'with_end_acc':
-        end_ramp_angle = integrate.quad(
-            lambda x: np.abs(omega(x)), steady_end_time - ramp_constant_time,
-            end_ramp_end_time + ramp_constant_time)[0]
-        print('end linear ramp angle = %s' % end_ramp_angle)
-
     omega_int = []
     for ti in t:
         omega_int.append(omega(ti))
 
+    t_int_ramp = [
+        tx for tx in t if tx >= ramp_start_time - 2 * ramp_constant_time
+        and tx <= i_ramp_end_time + 2 * ramp_constant_time
+    ]
+    t_ramp_length = len(t_int_ramp)
+    ramp_angle = integrate.simps(omega_int[0:t_ramp_length],
+                                 t_int_ramp) * np.pi / 180
+    print('initial linear ramp angle = %s' % ramp_angle)
+
+    if ramp_mode == 'with_end_acc':
+        t_int_eramp = [
+            tx for tx in t if tx >= steady_end_time - 2 * ramp_constant_time
+            and tx <= end_ramp_end_time + 2 * ramp_constant_time
+        ]
+        t_eramp_length = len(t_int_eramp)
+        decc_start_ind = np.argwhere(t == t_int_eramp[0])[0][0]
+        end_ramp_angle = integrate.simps(
+            omega_int[decc_start_ind:decc_start_ind + t_eramp_length],
+            t_int_eramp) * np.pi / 180
+        print('end linear ramp angle = %s' % end_ramp_angle)
+
+    t_int_stroke = [
+        tx for tx in t if tx >= ramp_start_time - 2 * ramp_constant_time
+        and tx <= end_ramp_end_time + 2 * ramp_constant_time
+    ]
+    t_stroke_length = len(t_int_stroke)
+    stroke_angle = integrate.simps(omega_int[0:t_stroke_length], t_int_stroke)
+    st_dist = np.abs(stroke_angle) * np.pi / 180 * section_location
+    print('2d wing travel distance = %s' % st_dist)
+
     def phi(x):
         """rotation angle function"""
-        t_int = [tx for tx in t if tx <= x]
-        time_array_length = len(t_int)
-        return integrate.simps(omega_int[0:time_array_length], t_int)
-
-    st_dist = np.abs(phi(t[-1])) * np.pi / 180 * section_location
-    print('2d wing travel distance = %s\n' % st_dist)
+        if x <= end_ramp_end_time + 2 * ramp_constant_time:
+            t_int = [tx for tx in t if tx <= x]
+            time_array_length = len(t_int)
+            return integrate.simps(omega_int[0:time_array_length], t_int)
+        else:
+            return stroke_angle
 
     #--pitching motion functions--
     if pitch_mode == 'with_end_pitch':
@@ -458,37 +485,54 @@ def smooth_linear_ramp(t, kinematic_parameters):
         def dalf(x):
             """linear ramp pitch speed function"""
             if x <= pitch_end_time + 2 * ramp_constant_time and x >= pitch_start_time - 2 * ramp_constant_time:
-                f_t0 = np.cosh(smooth_factor * (x - pitch_start_time))
-                f_t1 = np.cosh(smooth_factor * (x - p_acc_end_time))
-                f_t2 = np.cosh(smooth_factor * (x - p_decc_start_time))
-                f_t3 = np.cosh(smooth_factor * (x - pitch_end_time))
+                f_t0 = smooth_factor * (x - pitch_start_time)
+                f_t1 = smooth_factor * (x - p_acc_end_time)
+                f_t2 = smooth_factor * (x - p_decc_start_time)
+                f_t3 = smooth_factor * (x - pitch_end_time)
 
-                dalfx = (pitch_acceleration / 2) / smooth_factor * np.log(
-                    f_t0 / f_t1 * f_t3 / f_t2)
+                dalfx = (pitch_acceleration /
+                         2) / smooth_factor * (logcosh(f_t0) - logcosh(f_t1) +
+                                               logcosh(f_t3) - logcosh(f_t2))
             else:
                 dalfx = 0
 
             return dalfx
 
+        dalf_int = []
+        for ti in t:
+            dalf_int.append(dalf(ti))
+
+        t_int_pitch = [
+            tx for tx in t if tx >= pitch_start_time - 2 * ramp_constant_time
+            and tx <= pitch_end_time + 2 * ramp_constant_time
+        ]
+        t_pitch_length = len(t_int_pitch)
+        pitch_start_ind = np.argwhere(t == t_int_pitch[0])[0][0]
+
+        pitch_angle = integrate.simps(
+            dalf_int[pitch_start_ind:pitch_start_ind + t_pitch_length],
+            t_int_pitch)
+
+        print('wing pitch angle = %s' % np.abs(pitch_angle))
+
         steady_pitching_omega = dalf((pitch_start_time + pitch_end_time) / 2)
         omega_print = steady_pitching_omega * np.pi / 180
-        print('steady wing pitch omega = %s' % omega_print)
+        print('steady wing pitch omega = %s\n' % omega_print)
 
         def ddalf(x):
             """flapping angular acceleration function"""
             return derivative(dalf, x, dx=1e-6)
 
-        dalf_int = []
-        for ti in t:
-            dalf_int.append(dalf(ti))
-
         def alf(x):
             """rotation angle function"""
-            t_int = [tx for tx in t if tx <= x]
-            time_array_length = len(t_int)
-            return integrate.simps(dalf_int[0:time_array_length], t_int)
-
-        print('wing pitch angle = %s' % alf(t[-1]))
+            if x <= pitch_end_time + 2 * ramp_constant_time and x >= pitch_start_time - 2 * ramp_constant_time:
+                t_int = [tx for tx in t if tx <= x]
+                time_array_length = len(t_int)
+                return integrate.simps(dalf_int[0:time_array_length], t_int)
+            elif x < pitch_start_time - 2 * ramp_constant_time:
+                return 0
+            elif x > pitch_end_time + 2 * ramp_constant_time:
+                return pitch_angle
 
     kinematic_angles = []
     for ti in t:
@@ -502,3 +546,24 @@ def smooth_linear_ramp(t, kinematic_parameters):
         kinematic_angles.append(kinematic_anglesi)
 
     return kinematic_angles
+
+
+#------------------------------------------------------------
+def read_planning_parameters_csv(parameters_file):
+    """function to read planning parameters for cases array"""
+    parameters_arr = []
+    with open(parameters_file) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        line_count = 0
+
+        for row in csv_reader:
+            if line_count <= 4:
+                line_count += 1
+            else:
+                parameters_arr.append([float(x) for x in row])
+                line_count += 1
+
+        print(f'Processed {line_count} lines in {parameters_file}')
+
+    parameters_arr = np.array(parameters_arr)
+    return parameters_arr

@@ -7,7 +7,7 @@ from scipy.spatial.transform import Rotation as R
 
 
 def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
-               h_axis):
+               h_axis, save_file):
     """
     A helper function to make a graph
 
@@ -166,15 +166,19 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
     ax.set_title('kinematics plot')
     ax.legend()
 
-    out_figure_file = os.path.join(cwd, 'kinematics_plot.png')
-    fig.savefig(out_figure_file)
-    plt.show()
+    if save_file == 'current':
+        out_figure_file = os.path.join(cwd, 'kinematics_plot.png')
+        fig.savefig(out_figure_file)
+        plt.show()
+    else:
+        fig.savefig(save_file)
+        plt.close()
 
     return fig
 
 
 def write_2d(t, section_location, kinematic_angles,
-             time_series_length_per_cycle):
+             time_series_length_per_cycle, save_file):
     """write kinematics data for 2d wing motion"""
     kinematic_angles = np.array(kinematic_angles)
     time_series_length = len(t)
@@ -222,9 +226,14 @@ def write_2d(t, section_location, kinematic_angles,
 
     motion.append(')')
 
-    with open('6DoF_2d.dat', 'w') as f:
-        for item in motion:
-            f.write("%s\n" % item)
+    if save_file == 'current':
+        with open('6DoF_2d.dat', 'w') as f:
+            for item in motion:
+                f.write("%s\n" % item)
+    else:
+        with open(save_file, 'w') as f:
+            for item in motion:
+                f.write("%s\n" % item)
 
 
 def write_3d(t, kinematic_angles, time_series_length_per_cycle):

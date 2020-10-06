@@ -1,13 +1,14 @@
 """script for tabulated 6DOF revolving wing motion"""
 
+import os
 import numpy as np
 
 from kinematic_functions import sinu_ramp_rev, smooth_linear_ramp
 from kinematics_write import kf_plotter, write_2d, write_3d
 
 # sinumation time definition and choose ramp functions to use
-ramp_time_series_length = 120
-steady_rotation_time_series_length = 1000
+ramp_time_series_length = 400
+steady_rotation_time_series_length = 1600
 start_time = 0
 steady_rotation_time = 1.62
 #------------------------------
@@ -34,16 +35,16 @@ ramp_mode = 'with_end_acc'
 # ramp_mode = 'no_end_acc'
 #----------------------------------------
 #-wing pitching mode at decelleration phase--
-pitch_mode = 'with_end_pitch' #--used when ramp mode with_end_acc
+pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
 # pitch_mode = 'no_end_pitch'
-pitch_acceleration = 7935
+pitch_acceleration = 15035
 pitch_time = 0.355
-pitch_acc_time_fraction = 0.2  #--relative to pitch time: 0 ~ 1
+pitch_acc_time_fraction = 0.1  #--relative to pitch time: 0 ~ 1
 pitch_delay_time_fraction = 0
 #----------------------------------------
 #-zero velocity time after the wing stoped--
 end_constant_time = 4.764
-end_c_time_series_length = 2000
+end_c_time_series_length = 3200
 #------------------------------
 #------------------------------
 if ramp_function == 'smooth_linear_ramp':
