@@ -9,7 +9,7 @@ from kinematic_functions import (read_planning_parameters_csv,
                                  smooth_linear_ramp)
 from kinematics_write import kf_plotter, write_2d
 
-time_step_increment = 1e-3
+time_step_increment = 2e-3
 parameters_file_name = '2d_case_parameters'
 output_dir = '2d_kinematic_cases'
 # sinumation time definition and choose ramp functions to use
