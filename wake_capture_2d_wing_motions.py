@@ -9,9 +9,22 @@ from kinematic_functions import (read_planning_parameters_csv,
                                  smooth_linear_ramp)
 from kinematics_write import kf_plotter, write_2d
 
-time_step_increment = 2.5e-3
+time_step_increment = 2e-3
 parameters_file_name = '2d_case_parameters'
 output_dir = '2d_kinematic_cases'
+# sinumation time definition and choose ramp functions to use
+ramp_function = 'smooth_linear_ramp'
+ramp_mode = 'with_end_acc'
+pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
+section_location = 1  #used only for 2d cases
+start_time = 0
+end_time = 14.5
+#--------------------------------------------
+ramp_constant_time = 0.1
+pitch_acc_time_fraction = 0.1  #--relative to pitch time: 0 ~ 1
+pitch_delay_time_fraction = 0
+#-conner smoothing parameter, higher indicates shorter smooth range--
+smooth_factor = 50
 #------------------------------------------
 cwd = os.getcwd()
 output_dir_path = os.path.join(cwd, output_dir)
@@ -25,19 +38,6 @@ for case in parameters_arr:
         case[2]) + '_pf' + str(case[3])
     save_file_data = os.path.join(output_dir_path, file_name + '.dat')
     save_file_image = os.path.join(output_dir_path, file_name + '.png')
-    # sinumation time definition and choose ramp functions to use
-    ramp_function = 'smooth_linear_ramp'
-    ramp_mode = 'with_end_acc'
-    pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
-    section_location = 1  #used only for 2d cases
-    start_time = 0
-    end_time = 14.5
-    #--------------------------------------------
-    ramp_constant_time = 0.1
-    pitch_acc_time_fraction = 0.1  #--relative to pitch time: 0 ~ 1
-    pitch_delay_time_fraction = 0
-    #-conner smoothing parameter, higher indicates shorter smooth range--
-    smooth_factor = 150
     #--------------------------------------------
     #--ramp time and initial zero velocity time--
     ramp_time = case[4]
@@ -45,17 +45,17 @@ for case in parameters_arr:
     pitch_time = case[6]
     ramp_stage_acceleration = case[8] / section_location * 180 / np.pi
     pitch_acceleration = case[9]
-    end_constant_time = end_time - 2 * (
-        ramp_time + ramp_constant_time) - steady_rotation_time
     #-------------------------------------------
-    ramp_time_series_length = int(np.ceil(ramp_time / time_step_increment))
+    if ramp_function == 'smooth_linear_ramp':
+        initial_ramp_time = ramp_time + ramp_constant_time
+        end_constant_time = end_time - 2 * initial_ramp_time - steady_rotation_time
+
+    ramp_time_series_length = int(
+        np.ceil(initial_ramp_time / time_step_increment))
     steady_rotation_time_series_length = int(
         np.ceil(steady_rotation_time / time_step_increment))
     end_c_time_series_length = int(
         np.ceil(end_constant_time / time_step_increment))
-    #------------------------------
-    if ramp_function == 'smooth_linear_ramp':
-        initial_ramp_time = ramp_time + ramp_constant_time
 
     i_ramp_end_time = start_time + initial_ramp_time
     steady_end_time = i_ramp_end_time + steady_rotation_time
@@ -98,7 +98,7 @@ for case in parameters_arr:
         kinematic_angles = smooth_linear_ramp(t, kinematic_parameters)
 
     #--------------------------------------------------
-    angles_to_plot = ['dphi', 'dalf']
+    angles_to_plot = ['dphi', 'ddphi']
     kf_plotter(t, kinematic_angles, angles_to_plot, 'basic', 'against_t',
                save_file_image)
     write_2d(t, section_location, kinematic_angles, 'basic', save_file_data)
