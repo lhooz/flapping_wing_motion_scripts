@@ -9,7 +9,7 @@ from kinematic_functions import (read_planning_parameters_csv,
                                  smooth_linear_ramp)
 from kinematics_write import kf_plotter, write_2d
 
-time_step_increment = 3e-3
+time_step_increment = 2.5e-3
 parameters_file_name = '2d_case_parameters'
 output_dir = '2d_kinematic_cases'
 #------------------------------------------
@@ -31,9 +31,9 @@ for case in parameters_arr:
     pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
     section_location = 1  #used only for 2d cases
     start_time = 0
-    #-zero velocity time after the wing stoped--
+    end_time = 14.5
+    #--------------------------------------------
     ramp_constant_time = 0.1
-    end_constant_time = 6
     pitch_acc_time_fraction = 0.1  #--relative to pitch time: 0 ~ 1
     pitch_delay_time_fraction = 0
     #-conner smoothing parameter, higher indicates shorter smooth range--
@@ -45,6 +45,8 @@ for case in parameters_arr:
     pitch_time = case[6]
     ramp_stage_acceleration = case[8] / section_location * 180 / np.pi
     pitch_acceleration = case[9]
+    end_constant_time = end_time - 2 * (
+        ramp_time + ramp_constant_time) - steady_rotation_time
     #-------------------------------------------
     ramp_time_series_length = int(np.ceil(ramp_time / time_step_increment))
     steady_rotation_time_series_length = int(
