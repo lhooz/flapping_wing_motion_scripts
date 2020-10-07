@@ -24,7 +24,7 @@ ramp_constant_time = 0.1
 pitch_acc_time_fraction = 0.1  #--relative to pitch time: 0 ~ 1
 pitch_delay_time_fraction = 0
 #-conner smoothing parameter, higher indicates shorter smooth range--
-smooth_factor = 50
+smooth_factor = 100
 #------------------------------------------
 cwd = os.getcwd()
 output_dir_path = os.path.join(cwd, output_dir)
@@ -73,7 +73,7 @@ for case in parameters_arr:
         kinematic_angles = smooth_linear_ramp(t, kinematic_parameters)
 
     #--------------------------------------------------
-    angles_to_plot = ['dphi', 'ddphi']
+    angles_to_plot = ['dphi', 'dalf']
     kf_plotter(t, kinematic_angles, angles_to_plot, 'basic', 'against_t',
                save_file_image)
     write_2d(t, section_location, kinematic_angles, 'basic', save_file_data)
