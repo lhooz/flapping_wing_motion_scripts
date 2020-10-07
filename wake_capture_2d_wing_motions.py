@@ -9,7 +9,7 @@ from kinematic_functions import (read_planning_parameters_csv,
                                  smooth_linear_ramp)
 from kinematics_write import kf_plotter, write_2d
 
-time_step_increment = 2e-3
+time_step_increment = 1e-3
 parameters_file_name = '2d_case_parameters'
 output_dir = '2d_kinematic_cases'
 # sinumation time definition and choose ramp functions to use
@@ -50,42 +50,17 @@ for case in parameters_arr:
         initial_ramp_time = ramp_time + ramp_constant_time
         end_constant_time = end_time - 2 * initial_ramp_time - steady_rotation_time
 
-    ramp_time_series_length = int(
-        np.ceil(initial_ramp_time / time_step_increment))
-    steady_rotation_time_series_length = int(
-        np.ceil(steady_rotation_time / time_step_increment))
-    end_c_time_series_length = int(
-        np.ceil(end_constant_time / time_step_increment))
+    time_series_length = int(
+        np.ceil((end_time - start_time) / time_step_increment))
+    t = np.linspace(start_time, end_time, time_series_length)
 
     i_ramp_end_time = start_time + initial_ramp_time
     steady_end_time = i_ramp_end_time + steady_rotation_time
-    t_ramp = np.linspace(start_time, i_ramp_end_time, ramp_time_series_length)
-    t_rev = np.linspace(i_ramp_end_time, steady_end_time,
-                        steady_rotation_time_series_length)
-    t_rev = np.delete(t_rev, 0)
-    t = np.append(t_ramp, t_rev)
     if ramp_function == 'smooth_linear_ramp':
         end_ramp_time = initial_ramp_time
 
         ramp_start_time = start_time + ramp_constant_time
         end_ramp_end_time = steady_end_time + end_ramp_time - ramp_constant_time
-
-        if ramp_mode == 'with_end_acc':
-            t_end_ramp = np.linspace(steady_end_time,
-                                     steady_end_time + end_ramp_time,
-                                     ramp_time_series_length)
-            t_end_ramp = np.delete(t_end_ramp, 0)
-            t = np.append(t, t_end_ramp)
-
-            final_end_time = steady_end_time + end_ramp_time + end_constant_time
-            t_end_final = np.linspace(steady_end_time + end_ramp_time,
-                                      final_end_time, end_c_time_series_length)
-
-            t_end_final = np.delete(t_end_final, 0)
-            t = np.append(t, t_end_final)
-
-    time_series_length = len(t)
-    # print(t)
 
     if ramp_function == 'smooth_linear_ramp':
         kinematic_parameters = [
