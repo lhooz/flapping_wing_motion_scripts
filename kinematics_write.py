@@ -236,7 +236,7 @@ def write_2d(t, section_location, kinematic_angles,
                 f.write("%s\n" % item)
 
 
-def write_3d(t, kinematic_angles, time_series_length_per_cycle):
+def write_3d(t, kinematic_angles, time_series_length_per_cycle, save_file):
     """write kinematics data for 3d wing motion"""
     kinematic_angles = np.array(kinematic_angles)
     time_series_length = len(t)
@@ -283,9 +283,14 @@ def write_3d(t, kinematic_angles, time_series_length_per_cycle):
 
     motion.append(')')
 
-    with open('6DoF_3d.dat', 'w') as f:
-        for item in motion:
-            f.write("%s\n" % item)
+    if save_file == 'current':
+        with open('6DoF_3d.dat', 'w') as f:
+            for item in motion:
+                f.write("%s\n" % item)
+    else:
+        with open(save_file, 'w') as f:
+            for item in motion:
+                f.write("%s\n" % item)
 
 
 def write_iaoa(kinematic_angles):

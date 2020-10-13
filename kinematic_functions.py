@@ -130,17 +130,24 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
         np.abs(flapping_delay_time_fraction) / flapping_wing_frequency)[0]
     initial_phi = -np.sign(flapping_delay_time_fraction) * initial_phi
 
-    dphi_int = []
-    for ti in t:
-        dphi_int.append(dphi(ti))
-
     def phi(x):
         """flapping motion function"""
-        t_int = [tx for tx in t if tx <= x]
-        time_array_length = len(t_int)
-        # print(time_array_length, dphi_int[0:time_array_length])
-        return flapping_amplitude / 4 + initial_phi + integrate.simps(
-            dphi_int[0:time_array_length], t_int)
+        T = 1 / flapping_wing_frequency
+        delay = flapping_delay_time_fraction * T
+        tr = flapping_acceleration_time_fraction * T
+        beta = 1 - (2 * tr / T)
+
+        t_T1 = 0 + delay
+        t_T2 = (T * (1 - beta) / 4) + delay
+        t_T3 = (T * (1 + beta) / 4) + delay
+        t_T4 = (T * (3 - beta) / 4) + delay
+        t_T5 = (T * (3 + beta) / 4) + delay
+        t_T6 = T + delay
+        points = [t_T1, t_T2, t_T3, t_T4, t_T5, t_T6]
+
+        phix = flapping_amplitude / 4 + initial_phi + integrate.quad(
+            dphi, 0, x, points=points)[0]
+        return phix
 
     def dalf(x):
         """flapping angular velocity function"""
@@ -162,17 +169,23 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
         np.abs(pitching_delay_time_fraction) / flapping_wing_frequency)[0]
     initial_alf = -np.sign(pitching_delay_time_fraction) * initial_alf
 
-    dalf_int = []
-    for ti in t:
-        dalf_int.append(dalf(ti))
-
     def alf(x):
         """pitching motion function"""
-        t_int = [tx for tx in t if tx <= x]
-        time_array_length = len(t_int)
-        # print(time_array_length, dphi_int[0:time_array_length])
-        return initial_alf + integrate.simps(dalf_int[0:time_array_length],
-                                             t_int)
+        T = 1 / flapping_wing_frequency
+        delay = pitching_delay_time_fraction * T
+        tr = pitching_time_fraction * T
+        beta = 1 - (2 * tr / T)
+
+        t_T1 = 0 + delay
+        t_T2 = (T * (1 - beta) / 4) + delay
+        t_T3 = (T * (1 + beta) / 4) + delay
+        t_T4 = (T * (3 - beta) / 4) + delay
+        t_T5 = (T * (3 + beta) / 4) + delay
+        t_T6 = T + delay
+        points = [t_T1, t_T2, t_T3, t_T4, t_T5, t_T6]
+
+        alfx = initial_alf + integrate.quad(dalf, 0, x, points=points)[0]
+        return alfx
 
     kinematic_angles = []
     t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
@@ -288,15 +301,15 @@ def kf(f, amp, tr_fac, del_fac, t):
             (2 * np.pi * (t - (beta * T / 2))) / (T * (1 - beta)))
     elif t_T4 <= t < t_T5:
         f_value = -amp
-    elif t_T5 <= t < t_T6:
+    elif t_T5 <= t <= t_T6:
         f_value = amp * np.sin((2 * np.pi * (t - beta * T)) / (T * (1 - beta)))
     return f_value
     # ------------------------------------------
 
 
-    # original sinusoidal (sinusiodal) function
+    # sinusoidal (sinusiodal) function that is continuous in acc
 def kf_continuous(f, amp, tr_fac, del_fac, t):
-    """kinematic_function for flapping velocity and angle of attack"""
+    """continuous in acc kinematic_function for flapping velocity and angle of attack"""
     T = 1 / f
     T_sinu = 0.5 * T
     delay = del_fac * T
@@ -321,7 +334,7 @@ def kf_continuous(f, amp, tr_fac, del_fac, t):
             (2 * np.pi * (t - (beta * T / 2))) / (T_sinu * (1 - beta)))
     elif t_T4 <= t < t_T5:
         f_value = 0
-    elif t_T5 <= t < t_T6:
+    elif t_T5 <= t <= t_T6:
         f_value = amp / 2 + amp / 2 * np.cos(
             (2 * np.pi * (t - beta * T)) / (T_sinu * (1 - beta)))
     return f_value
@@ -363,10 +376,7 @@ def sinu_ramp_rev(t, kinematic_parameters):
     def phi(x):
         """rotation angle function"""
         if x <= initial_ramp_time:
-            t_int = [tx for tx in t if tx <= x]
-            time_array_length = len(t_int)
-            # print(time_array_length, dphi_int[0:time_array_length])
-            return integrate.simps(omega_int[0:time_array_length], t_int)
+            return integrate.quad(omega, 0, x)[0]
         else:
             return ramp_angle + steady_rotation_omega * (x - initial_ramp_time)
 

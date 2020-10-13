@@ -1,4 +1,4 @@
-"""script for tabulated 6DOF revolving wing motion"""
+"""script for 2d wake capture wing motion"""
 
 import os
 import shutil
@@ -48,7 +48,7 @@ for case in parameters_arr:
     #-------------------------------------------
     if ramp_function == 'smooth_linear_ramp':
         initial_ramp_time = ramp_time + ramp_constant_time
-        end_constant_time = end_time - 2 * initial_ramp_time - steady_rotation_time
+        # end_constant_time = end_time - 2 * initial_ramp_time - steady_rotation_time
 
     time_series_length = int(
         np.ceil((end_time - start_time) / time_step_increment))
