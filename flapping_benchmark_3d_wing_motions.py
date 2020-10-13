@@ -33,8 +33,8 @@ parameters_arr = read_planning_parameters_csv(parameters_file)
 for pitch_tf in pitching_wave_form:
     pitching_time_fraction = pitch_tf
     for case in parameters_arr:
-        file_name = 'Re' + str(case[0]) + '_ar' + str(case[1]) + '_off' + str(
-            case[2]) + '_r1h' + str(case[3]) + '_pt' + str(pitch_tf)
+        file_name = 'ar' + str(case[1]) + '_ofs' + str(case[2]) + '_r1h' + str(
+            case[3]) + '_Re' + str(case[0]) + '_pt' + str(pitch_tf)
         save_file_data = os.path.join(output_dir_path, file_name + '.dat')
         save_file_image = os.path.join(output_dir_path, file_name + '.png')
         save_file_cf = os.path.join(output_dir_path, file_name + '.cf')
