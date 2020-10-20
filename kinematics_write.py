@@ -182,6 +182,7 @@ def write_2d(t, section_location, kinematic_angles,
     """write kinematics data for 2d wing motion"""
     kinematic_angles = np.array(kinematic_angles)
     time_series_length = len(t)
+
     if time_series_length_per_cycle == 'basic':
         no_of_points_per_cycle = time_series_length + 1
     else:
@@ -199,7 +200,7 @@ def write_2d(t, section_location, kinematic_angles,
         i_moded = np.mod(i, no_of_points_per_cycle - 1)
 
         t_dispi = section_location * kinematic_angles[i_moded][0] * np.pi / 180
-        t_dispi = [str(t_dispi), '0', '0']
+        t_dispi = ['{:0.08g}'.format(t_dispi), '0', '0']
         t_disp.append(t_dispi)
 
         # ----------------------------------------------
@@ -210,13 +211,13 @@ def write_2d(t, section_location, kinematic_angles,
         # roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
         # r_anglei = roti.as_euler('XYZ', degrees=True)
         r_anglei = kinematic_anglesi
-
-        r_anglei = [str(r_anglei[0]), str(r_anglei[1]), str(r_anglei[2])]
-
+        r_anglei = [
+            '{:0.08g}'.format(r_anglei[0]), '{:0.08g}'.format(r_anglei[1]),
+            '{:0.08g}'.format(r_anglei[2])
+        ]
         r_angle.append(r_anglei)
 
-    t = [str(ti) for ti in t]
-
+    t = ['{:0.08g}'.format(ti) for ti in t]
     motion = [str(time_series_length), '(']
     for ti, disp_i, angle_i in zip(t, t_disp, r_angle):
         motioni = '(' + ti + ' ((' + ' '.join(disp_i) + ')' + '(' + ' '.join(
@@ -240,6 +241,7 @@ def write_3d(t, kinematic_angles, time_series_length_per_cycle, save_file):
     """write kinematics data for 3d wing motion"""
     kinematic_angles = np.array(kinematic_angles)
     time_series_length = len(t)
+
     if time_series_length_per_cycle == 'basic':
         no_of_points_per_cycle = time_series_length + 1
     else:
@@ -267,13 +269,14 @@ def write_3d(t, kinematic_angles, time_series_length_per_cycle, save_file):
         # roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
         # r_anglei = roti.as_euler('XYZ', degrees=True)
         r_anglei = kinematic_anglesi
-
-        r_anglei = [str(r_anglei[0]), str(r_anglei[1]), str(r_anglei[2])]
+        r_anglei = [
+            '{:0.08g}'.format(r_anglei[0]), '{:0.08g}'.format(r_anglei[1]),
+            '{:0.08g}'.format(r_anglei[2])
+        ]
 
         r_angle.append(r_anglei)
 
-    t = [str(ti) for ti in t]
-
+    t = ['{:0.08g}'.format(ti) for ti in t]
     motion = [str(time_series_length), '(']
     for ti, disp_i, angle_i in zip(t, t_disp, r_angle):
         motioni = '(' + ti + ' ((' + ' '.join(disp_i) + ')' + '(' + ' '.join(

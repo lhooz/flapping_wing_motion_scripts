@@ -9,7 +9,7 @@ from kinematic_functions import (read_planning_parameters_csv,
                                  smooth_linear_ramp)
 from kinematics_write import kf_plotter, write_2d
 
-time_step_increment = 2e-3
+time_step_increment = 1e-3
 parameters_file_name = '2d_case_parameters'
 output_dir = '2d_kinematic_cases'
 # sinumation time definition and choose ramp functions to use
@@ -18,7 +18,7 @@ ramp_mode = 'with_end_acc'
 pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
 section_location = 1  #used only for 2d cases
 start_time = 0
-end_time = 14.5
+end_time = 4
 #--------------------------------------------
 ramp_constant_time = 0.1
 pitch_acc_time_fraction = 0.1  #--relative to pitch time: 0 ~ 1
@@ -38,13 +38,19 @@ for case in parameters_arr:
         case[2]) + '_pf' + str(case[3])
     save_file_data = os.path.join(output_dir_path, file_name + '.dat')
     save_file_image = os.path.join(output_dir_path, file_name + '.png')
+    save_file_cf = os.path.join(output_dir_path, file_name + '.cf')
+    save_file_nu = os.path.join(output_dir_path, file_name + '.nu')
+
     #--------------------------------------------
     #--ramp time and initial zero velocity time--
     ramp_time = case[4]
     steady_rotation_time = case[5]
     pitch_time = case[6]
+    nu = case[7]
     ramp_stage_acceleration = case[8] / section_location * 180 / np.pi
     pitch_acceleration = case[9]
+    ref_area = 1
+    ref_vel = case[10]
     #-------------------------------------------
     if ramp_function == 'smooth_linear_ramp':
         initial_ramp_time = ramp_time + ramp_constant_time
@@ -77,3 +83,53 @@ for case in parameters_arr:
     kf_plotter(t, kinematic_angles, angles_to_plot, 'basic', 'against_t',
                save_file_image)
     write_2d(t, section_location, kinematic_angles, 'basic', save_file_data)
+
+    with open(save_file_cf, 'w') as f:
+        f.write(
+            '%s\n' %
+            '/*--------------------------------*- C++ -*----------------------------------*\\'
+        )
+        f.write(
+            '%s\n' %
+            r'\*---------------------------------------------------------------------------*/'
+        )
+        f.write('%s\n%s\n' % (r'forceCoeffs_object', r'{'))
+        f.write('%s\n%s\n' %
+                (r'    type forceCoeffs;', r'    libs ("libforces.so");'))
+        f.write('%s\n\n%s\n\n' %
+                (r'    patches (wing);', r'    writeControl writeTime;'))
+        f.write('%s\n%s\n\n' % (r'    pName p;', r'    Uname U;'))
+        f.write('%s\n%s\n\n' % (r'    rho rhoInf;', r'    rhoInf 1;'))
+        f.write('%s\n\n%s\n' % (r'    log true;', r'    CofR (0 0 0);'))
+        f.write('%s\n%s\n' %
+                (r'    liftDir (0 1 0);', r'    dragDir (1 0 0);'))
+        f.write('%s\n' % (r'    pitchAxis (0 0 1);'))
+        f.write('    magUInf %s%s\n' % (str(ref_vel), r';'))
+        f.write('    lRef 1;\n')
+        f.write('    Aref %s%s\n' % (str(ref_area), r';'))
+        f.write(r'}')
+
+    with open(save_file_nu, 'w') as f:
+        f.write(
+            '%s\n' %
+            '/*--------------------------------*- C++ -*----------------------------------*\\'
+        )
+        f.write(
+            '%s\n' %
+            r'\*---------------------------------------------------------------------------*/'
+        )
+        f.write('%s\n%s\n' % (r'FoamFile', r'{'))
+        f.write('    version     2.0;\n')
+        f.write('    format      ascii;\n')
+        f.write('    class       dictionary;\n')
+        f.write('    object      transportProperties;\n')
+        f.write('}\n')
+        f.write(
+            '// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n\n'
+        )
+        f.write('transportModel  Newtonian;\n\n')
+        f.write('nu              nu [ 0 2 -1 0 0 0 0 ] %s%s\n\n' %
+                (str(nu), r';'))
+        f.write(
+            '// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n\n'
+        )

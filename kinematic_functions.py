@@ -102,6 +102,7 @@ def smooth_kinematic_function(t, kinematic_parameters):
 # -------------------------------------------------
 def sinu_continuous_kinematic_function(t, kinematic_parameters):
     """definition for sinusoidal (sinusiodal) kinematic functiontion"""
+    int_precision = 1e-12
     flapping_wing_frequency = kinematic_parameters[0]
     flapping_angular_velocity_amplitude = kinematic_parameters[1]
     pitching_angular_velocity_amplitude = kinematic_parameters[2]
@@ -117,17 +118,21 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
             flapping_acceleration_time_fraction, flapping_delay_time_fraction,
             x)
 
-    flapping_amplitude = integrate.quad(lambda x: np.abs(dphi(x)), 0,
-                                        1 / flapping_wing_frequency)[0]
+    flapping_amplitude = integrate.quad(lambda x: np.abs(dphi(x)),
+                                        0,
+                                        1 / flapping_wing_frequency,
+                                        epsabs=int_precision)[0]
     print('flapping amplitude = %s' % (flapping_amplitude / 2))
 
     def ddphi(x):
         """flapping angular acceleration function"""
         return derivative(dphi, x, dx=1e-6)
 
-    initial_phi = integrate.quad(
-        lambda x: dphi(x), 0,
-        np.abs(flapping_delay_time_fraction) / flapping_wing_frequency)[0]
+    initial_phi = integrate.quad(dphi,
+                                 0,
+                                 np.abs(flapping_delay_time_fraction) /
+                                 flapping_wing_frequency,
+                                 epsabs=int_precision)[0]
     initial_phi = -np.sign(flapping_delay_time_fraction) * initial_phi
 
     def phi(x):
@@ -146,7 +151,7 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
         points = [t_T1, t_T2, t_T3, t_T4, t_T5, t_T6]
 
         phix = flapping_amplitude / 4 + initial_phi + integrate.quad(
-            dphi, 0, x, points=points)[0]
+            dphi, 0, x, points=points, epsabs=int_precision)[0]
         return phix
 
     def dalf(x):
@@ -156,17 +161,21 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
                              pitching_time_fraction,
                              pitching_delay_time_fraction, x)
 
-    pitching_amplitude = integrate.quad(lambda x: np.abs(dalf(x)), 0,
-                                        1 / flapping_wing_frequency)[0]
+    pitching_amplitude = integrate.quad(lambda x: np.abs(dalf(x)),
+                                        0,
+                                        1 / flapping_wing_frequency,
+                                        epsabs=int_precision)[0]
     print('pitching amplitude = %s' % (pitching_amplitude / 2))
 
     def ddalf(x):
         """pitching angular acceleration function"""
         return derivative(dalf, x, dx=1e-6)
 
-    initial_alf = integrate.quad(
-        lambda x: dalf(x), 0,
-        np.abs(pitching_delay_time_fraction) / flapping_wing_frequency)[0]
+    initial_alf = integrate.quad(dalf,
+                                 0,
+                                 np.abs(pitching_delay_time_fraction) /
+                                 flapping_wing_frequency,
+                                 epsabs=int_precision)[0]
     initial_alf = -np.sign(pitching_delay_time_fraction) * initial_alf
 
     def alf(x):
@@ -184,7 +193,8 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
         t_T6 = T + delay
         points = [t_T1, t_T2, t_T3, t_T4, t_T5, t_T6]
 
-        alfx = initial_alf + integrate.quad(dalf, 0, x, points=points)[0]
+        alfx = initial_alf + integrate.quad(
+            dalf, 0, x, points=points, epsabs=int_precision)[0]
         return alfx
 
     kinematic_angles = []
@@ -344,6 +354,7 @@ def kf_continuous(f, amp, tr_fac, del_fac, t):
     # revolving wing kinematics with sinusiodal ramp function
 def sinu_ramp_rev(t, kinematic_parameters):
     """revolving wing kinematics function with sinusoidal ramp at start"""
+    int_precision = 1e-12
     steady_rotation_frequency = kinematic_parameters[0]
     initial_ramp_time = kinematic_parameters[1]
 
@@ -376,7 +387,7 @@ def sinu_ramp_rev(t, kinematic_parameters):
     def phi(x):
         """rotation angle function"""
         if x <= initial_ramp_time:
-            return integrate.quad(omega, 0, x)[0]
+            return integrate.quad(omega, 0, x, epsabs=int_precision)[0]
         else:
             return ramp_angle + steady_rotation_omega * (x - initial_ramp_time)
 
@@ -391,6 +402,7 @@ def sinu_ramp_rev(t, kinematic_parameters):
 #---linear ramp function smoothed at conner for revolving or 2d translating wing--
 def smooth_linear_ramp(t, kinematic_parameters):
     """smoothed linear ramp function"""
+    int_precision = 1e-12
     ramp_stage_acceleration = kinematic_parameters[0]
     ramp_start_time = kinematic_parameters[1]
     i_ramp_end_time = kinematic_parameters[2]
@@ -439,22 +451,26 @@ def smooth_linear_ramp(t, kinematic_parameters):
         """flapping angular acceleration function"""
         return derivative(omega, x, dx=1e-6)
 
-    ramp_angle = integrate.quad(
-        lambda x: omega(x), ramp_start_time - 2 * ramp_constant_time,
-        i_ramp_end_time + 2 * ramp_constant_time)[0] * np.pi / 180
+    ramp_angle = integrate.quad(omega,
+                                ramp_start_time - 2 * ramp_constant_time,
+                                i_ramp_end_time + 2 * ramp_constant_time,
+                                epsabs=int_precision)[0] * np.pi / 180
 
     print('initial linear ramp angle = %s' % ramp_angle)
 
     if ramp_mode == 'with_end_acc':
         end_ramp_angle = integrate.quad(
-            lambda x: omega(x), steady_end_time - 2 * ramp_constant_time,
-            end_ramp_end_time + 2 * ramp_constant_time)[0] * np.pi / 180
+            omega,
+            steady_end_time - 2 * ramp_constant_time,
+            end_ramp_end_time + 2 * ramp_constant_time,
+            epsabs=int_precision)[0] * np.pi / 180
 
         print('end linear ramp angle = %s' % end_ramp_angle)
 
-    stroke_angle = integrate.quad(
-        lambda x: omega(x), ramp_start_time - 2 * ramp_constant_time,
-        end_ramp_end_time + 2 * ramp_constant_time)[0]
+    stroke_angle = integrate.quad(omega,
+                                  ramp_start_time - 2 * ramp_constant_time,
+                                  end_ramp_end_time + 2 * ramp_constant_time,
+                                  epsabs=int_precision)[0]
 
     st_dist = np.abs(stroke_angle) * np.pi / 180 * section_location
     print('2d wing travel distance = %s' % st_dist)
@@ -462,9 +478,10 @@ def smooth_linear_ramp(t, kinematic_parameters):
     def phi(x):
         """rotation angle function"""
         if x <= end_ramp_end_time + 2 * ramp_constant_time and x >= ramp_start_time - 2 * ramp_constant_time:
-            phi_out = integrate.quad(lambda x: omega(x),
+            phi_out = integrate.quad(omega,
                                      ramp_start_time - 2 * ramp_constant_time,
-                                     x)[0]
+                                     x,
+                                     epsabs=int_precision)[0]
 
         elif x < ramp_start_time - 2 * ramp_constant_time:
             phi_out = 0
@@ -499,9 +516,10 @@ def smooth_linear_ramp(t, kinematic_parameters):
 
             return dalfx
 
-        pitch_angle = integrate.quad(
-            lambda x: dalf(x), pitch_start_time - 2 * ramp_constant_time,
-            pitch_end_time + 2 * ramp_constant_time)[0]
+        pitch_angle = integrate.quad(dalf,
+                                     pitch_start_time - 2 * ramp_constant_time,
+                                     pitch_end_time + 2 * ramp_constant_time,
+                                     epsabs=int_precision)[0]
 
         print('wing pitch angle = %s' % np.abs(pitch_angle))
 
@@ -517,9 +535,11 @@ def smooth_linear_ramp(t, kinematic_parameters):
             """rotation angle function"""
             if x <= pitch_end_time + 2 * ramp_constant_time and x >= pitch_start_time - 2 * ramp_constant_time:
 
-                alf_out = integrate.quad(
-                    lambda x: dalf(x),
-                    pitch_start_time - 2 * ramp_constant_time, x)[0]
+                alf_out = integrate.quad(dalf,
+                                         pitch_start_time -
+                                         2 * ramp_constant_time,
+                                         x,
+                                         epsabs=int_precision)[0]
 
             elif x < pitch_start_time - 2 * ramp_constant_time:
                 alf_out = 0

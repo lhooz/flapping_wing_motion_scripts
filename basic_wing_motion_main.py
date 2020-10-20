@@ -37,8 +37,8 @@ ramp_mode = 'with_end_acc'
 #-wing pitching mode at decelleration phase--
 pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
 # pitch_mode = 'no_end_pitch'
-pitch_acceleration = 15035
-pitch_time = 0.355
+pitch_acceleration = 15035 / 4
+pitch_time = 0.71
 pitch_acc_time_fraction = 0.1  #--relative to pitch time: 0 ~ 1
 pitch_delay_time_fraction = 0
 #----------------------------------------

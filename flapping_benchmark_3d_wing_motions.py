@@ -92,8 +92,8 @@ for pitch_tf in pitching_wave_form:
             f.write('%s\n%s\n\n' % (r'    rho rhoInf;', r'    rhoInf 1;'))
             f.write('%s\n\n%s\n' % (r'    log true;', r'    CofR (0 0 0);'))
             f.write('%s\n%s\n' %
-                    (r'    liftDir (0 1 0);', r'    dragDir (1 0 0);'))
-            f.write('%s\n' % (r'    pitchAxis (0 0 1);'))
+                    (r'    liftDir (1 0 0);', r'    dragDir (0 0 1);'))
+            f.write('%s\n' % (r'    pitchAxis (0 1 0);'))
             f.write('    magUInf %s%s\n' % (str(ref_vel), r';'))
             f.write('    lRef 1;\n')
             f.write('    Aref %s%s\n' % (str(ref_area), r';'))
