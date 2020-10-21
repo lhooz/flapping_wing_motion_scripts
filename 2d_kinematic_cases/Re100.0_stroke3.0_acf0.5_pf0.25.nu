@@ -11,7 +11,7 @@ FoamFile
 
 transportModel  Newtonian;
 
-nu              nu [ 0 2 -1 0 0 0 0 ] 0.045;
+nu              nu [ 0 2 -1 0 0 0 0 ] 0.04;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

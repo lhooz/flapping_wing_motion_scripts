@@ -34,7 +34,7 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
     cwd = os.getcwd()
     t = np.array(t)
     kinematic_angles = np.array(kinematic_angles)
-    l_width = 1.5
+    l_width = 4
 
     time_series_length = len(t)
     if time_series_length_per_cycle == 'basic':
@@ -62,28 +62,28 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
             if legend == 'phi':
                 ax.plot(t,
                         y_arrays[:, 0],
-                        linestyle='solid',
+                        linestyle='dashed',
                         linewidth=l_width,
                         label=r'$\phi$')
                 y_label.append(r'\phi')
             elif legend == 'alf':
                 ax.plot(t,
                         y_arrays[:, 1],
-                        linestyle='solid',
+                        linestyle='dashed',
                         linewidth=l_width,
                         label=r'$\alpha$')
                 y_label.append(r'\alpha')
             elif legend == 'dphi':
                 ax.plot(t,
                         y_arrays[:, 2],
-                        linestyle='dashed',
+                        linestyle='solid',
                         linewidth=l_width,
                         label=r'$\dot\phi$')
                 y_label.append(r'\dot\phi')
             elif legend == 'dalf':
                 ax.plot(t,
                         y_arrays[:, 3],
-                        linestyle='dashed',
+                        linestyle='solid',
                         linewidth=l_width,
                         label=r'$\dot\alpha$')
                 y_label.append(r'\dot\alpha')
@@ -102,7 +102,7 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
                         label=r'$\ddot\alpha$')
                 y_label.append(r'\ddot\alpha')
 
-        ax.set_xlabel('t (s)')
+        ax.set_xlabel(r'$\^t$')
 
     elif h_axis == 'against_phi':
         x = y_arrays[:, 0]
@@ -110,28 +110,28 @@ def kf_plotter(t, kinematic_angles, legends, time_series_length_per_cycle,
             if legend == 'phi':
                 ax.plot(x,
                         y_arrays[:, 0],
-                        linestyle='solid',
+                        linestyle='dashed',
                         linewidth=l_width,
                         label=r'$\phi$')
                 y_label.append(r'\phi')
             elif legend == 'alf':
                 ax.plot(x,
                         y_arrays[:, 1],
-                        linestyle='solid',
+                        linestyle='dashed',
                         linewidth=l_width,
                         label=r'$\alpha$')
                 y_label.append(r'\alpha')
             elif legend == 'dphi':
                 ax.plot(x,
                         y_arrays[:, 2],
-                        linestyle='dashed',
+                        linestyle='solid',
                         linewidth=l_width,
                         label=r'$\dot\phi$')
                 y_label.append(r'\dot\phi')
             elif legend == 'dalf':
                 ax.plot(x,
                         y_arrays[:, 3],
-                        linestyle='dashed',
+                        linestyle='solid',
                         linewidth=l_width,
                         label=r'$\dot\alpha$')
                 y_label.append(r'\dot\alpha')
