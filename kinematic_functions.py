@@ -102,7 +102,7 @@ def smooth_kinematic_function(t, kinematic_parameters):
 # -------------------------------------------------
 def sinu_continuous_kinematic_function(t, kinematic_parameters):
     """definition for sinusoidal (sinusiodal) kinematic functiontion"""
-    int_precision = 1e-12
+    int_precision = 1e-10
     flapping_wing_frequency = kinematic_parameters[0]
     flapping_angular_velocity_amplitude = kinematic_parameters[1]
     pitching_angular_velocity_amplitude = kinematic_parameters[2]
@@ -453,7 +453,7 @@ def smooth_linear_ramp(t, kinematic_parameters):
 
     ramp_angle = integrate.quad(omega,
                                 ramp_start_time - 2 * ramp_constant_time,
-                                i_ramp_end_time + 2 * ramp_constant_time,
+                                i_ramp_end_time,
                                 epsabs=int_precision)[0] * np.pi / 180
 
     print('initial linear ramp angle = %s' % ramp_angle)
@@ -461,7 +461,7 @@ def smooth_linear_ramp(t, kinematic_parameters):
     if ramp_mode == 'with_end_acc':
         end_ramp_angle = integrate.quad(
             omega,
-            steady_end_time - 2 * ramp_constant_time,
+            steady_end_time,
             end_ramp_end_time + 2 * ramp_constant_time,
             epsabs=int_precision)[0] * np.pi / 180
 

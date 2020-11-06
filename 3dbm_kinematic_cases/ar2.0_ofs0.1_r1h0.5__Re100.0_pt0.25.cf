@@ -17,9 +17,9 @@ forceCoeffs_object
     log true;
 
     CofR (0 0 0);
-    liftDir (0 1 0);
-    dragDir (1 0 0);
-    pitchAxis (0 0 1);
+    liftDir (1 0 0);
+    dragDir (0 0 1);
+    pitchAxis (0 1 0);
     magUInf 0.396155715098421;
     lRef 1;
     Aref 0.007198760999941739;
