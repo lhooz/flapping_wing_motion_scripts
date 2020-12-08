@@ -20,7 +20,7 @@ forceCoeffs_object
     liftDir (0 1 0);
     dragDir (1 0 0);
     pitchAxis (0 0 1);
-    magUInf 9.62566844919786;
+    magUInf 10.000000000000002;
     lRef 1;
     Aref 1;
 }

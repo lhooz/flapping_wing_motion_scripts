@@ -35,7 +35,7 @@ parameters_file = os.path.join(cwd, parameters_file_name + '.csv')
 parameters_arr = read_planning_parameters_csv(parameters_file)
 for case in parameters_arr:
     file_name = 'Re' + str(case[0]) + '_stroke' + str(case[1]) + '_acf' + str(
-        case[2]) + '_pf' + str(case[3])
+        case[2]) + '_pf' + str(case[3]) + '_pa' + str(case[4])
     save_file_data = os.path.join(output_dir_path, file_name + '.dat')
     save_file_image = os.path.join(output_dir_path, file_name + '.png')
     save_file_cf = os.path.join(output_dir_path, file_name + '.cf')
@@ -43,14 +43,14 @@ for case in parameters_arr:
 
     #--------------------------------------------
     #--ramp time and initial zero velocity time--
-    ramp_time = case[4]
-    steady_rotation_time = case[5]
-    pitch_time = case[6]
-    nu = case[7]
-    ramp_stage_acceleration = case[8] / section_location * 180 / np.pi
-    pitch_acceleration = case[9]
+    ramp_time = case[5]
+    steady_rotation_time = case[6]
+    pitch_time = case[7]
+    nu = case[8]
+    ramp_stage_acceleration = case[9] / section_location * 180 / np.pi
+    pitch_acceleration = case[10]
     ref_area = 1
-    ref_vel = case[10]
+    ref_vel = case[11]
     #-------------------------------------------
     if ramp_function == 'smooth_linear_ramp':
         initial_ramp_time = ramp_time + ramp_constant_time
