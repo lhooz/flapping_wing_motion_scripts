@@ -9,8 +9,8 @@ from kinematics_write import kf_plotter, write_2d, write_3d
 # sinumation time definition and choose ramp functions to use
 time_step_increment = 2e-3
 start_time = 0
-end_time = 14.5
-steady_rotation_time = 1.62
+end_time = 2.5
+steady_rotation_time = 1.0
 #------------------------------
 section_location = 1  #used only for 2d cases
 #------------------------------
@@ -25,18 +25,18 @@ initial_ramp_time = 1
 #--parameters for smooth_linear_ramp function---
 ramp_stage_acceleration = 245.2
 #-conner smoothing parameter, higher indicates shorter smooth range--
-smooth_factor = 150
+smooth_factor = 100
 #--ramp time and initial zero velocity time--
-ramp_time = 0.355
-ramp_constant_time = 0.026
+ramp_time = 0.5
+ramp_constant_time = 0.02
 #----------------------------------------
 #-decelleration process of wing motion--
-ramp_mode = 'with_end_acc'
-# ramp_mode = 'no_end_acc'
+# ramp_mode = 'with_end_acc'
+ramp_mode = 'no_end_acc'
 #----------------------------------------
 #-wing pitching mode at decelleration phase--
-pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
-# pitch_mode = 'no_end_pitch'
+# pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
+pitch_mode = 'no_end_pitch'
 pitch_acceleration = 15035 / 4
 pitch_time = 0.71
 pitch_acc_time_fraction = 0.1  #--relative to pitch time: 0 ~ 1
@@ -76,4 +76,4 @@ kf_plotter(t, kinematic_angles, angles_to_plot, 'basic', 'against_t',
            'current')
 
 write_2d(t, section_location, kinematic_angles, 'basic', 'current')
-write_3d(t, kinematic_angles, 'basic')
+# write_3d(t, kinematic_angles, 'basic', 'current')

@@ -18,7 +18,7 @@ ramp_mode = 'with_end_acc'
 pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
 section_location = 1  #used only for 2d cases
 start_time = 0
-end_time = 3.5
+end_time = 2.6
 #--------------------------------------------
 ramp_constant_time = 0.02
 pitch_acc_time_fraction = 0.5  #--relative to pitch time: 0 ~ 1
