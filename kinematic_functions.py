@@ -4,6 +4,7 @@ import csv
 
 import autograd.numpy as np
 import scipy.integrate as integrate
+from scipy.interpolate import UnivariateSpline
 from autograd import grad
 from scipy.misc import derivative
 
@@ -115,7 +116,6 @@ def smooth_kinematic_function(t, kinematic_parameters):
 # -------------------------------------------------
 def sinu_continuous_kinematic_function(t, kinematic_parameters):
     """definition for sinusoidal (sinusiodal) kinematic functiontion"""
-    int_precision = 1e-10
     flapping_wing_frequency = kinematic_parameters[0]
     flapping_angular_velocity_amplitude = kinematic_parameters[1]
     pitching_angular_velocity_amplitude = kinematic_parameters[2]
@@ -131,41 +131,30 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
             flapping_acceleration_time_fraction, flapping_delay_time_fraction,
             x)
 
-    flapping_amplitude = integrate.quad(lambda x: np.abs(dphi(x)),
-                                        0,
-                                        1 / flapping_wing_frequency,
-                                        epsabs=int_precision)[0]
+    dphi_data = []
+    dphi_data_abs = []
+    for ti in t:
+        dphi_data.append(dphi(ti))
+        dphi_data_abs.append(np.abs(dphi(ti)))
+    dphi_spl = UnivariateSpline(t, dphi_data, s=0)
+    dphi_spl_abs = UnivariateSpline(t, dphi_data_abs, s=0)
+
+    flapping_amplitude = dphi_spl_abs.integral(0, 1 / flapping_wing_frequency)
+
     print('flapping amplitude = %s' % (flapping_amplitude / 2))
 
     def ddphi(x):
         """flapping angular acceleration function"""
-        return derivative(dphi, x, dx=1e-6)
+        return dphi_spl.derivatives(x)[1]
 
-    initial_phi = integrate.quad(dphi,
-                                 0,
-                                 np.abs(flapping_delay_time_fraction) /
-                                 flapping_wing_frequency,
-                                 epsabs=int_precision)[0]
+    initial_phi = dphi_spl.integral(
+        0,
+        np.abs(flapping_delay_time_fraction) / flapping_wing_frequency)
     initial_phi = -np.sign(flapping_delay_time_fraction) * initial_phi
 
     def phi(x):
         """flapping motion function"""
-        T = 1 / flapping_wing_frequency
-        delay = flapping_delay_time_fraction * T
-        tr = flapping_acceleration_time_fraction * T
-        beta = 1 - (2 * tr / T)
-
-        t_T1 = 0 + delay
-        t_T2 = (T * (1 - beta) / 4) + delay
-        t_T3 = (T * (1 + beta) / 4) + delay
-        t_T4 = (T * (3 - beta) / 4) + delay
-        t_T5 = (T * (3 + beta) / 4) + delay
-        t_T6 = T + delay
-        points = [t_T1, t_T2, t_T3, t_T4, t_T5, t_T6]
-
-        phix = flapping_amplitude / 4 + initial_phi + integrate.quad(
-            dphi, 0, x, points=points, epsabs=int_precision)[0]
-        return phix
+        return flapping_amplitude / 4 + initial_phi + dphi_spl.integral(0, x)
 
     def dalf(x):
         """flapping angular velocity function"""
@@ -174,41 +163,29 @@ def sinu_continuous_kinematic_function(t, kinematic_parameters):
                              pitching_time_fraction,
                              pitching_delay_time_fraction, x)
 
-    pitching_amplitude = integrate.quad(lambda x: np.abs(dalf(x)),
-                                        0,
-                                        1 / flapping_wing_frequency,
-                                        epsabs=int_precision)[0]
+    dalf_data = []
+    dalf_data_abs = []
+    for ti in t:
+        dalf_data.append(dalf(ti))
+        dalf_data_abs.append(np.abs(dalf(ti)))
+    dalf_spl = UnivariateSpline(t, dalf_data, s=0)
+    dalf_spl_abs = UnivariateSpline(t, dalf_data_abs, s=0)
+
+    pitching_amplitude = dalf_spl_abs.integral(0, 1 / flapping_wing_frequency)
     print('pitching amplitude = %s' % (pitching_amplitude / 2))
 
     def ddalf(x):
         """pitching angular acceleration function"""
-        return derivative(dalf, x, dx=1e-6)
+        return dalf_spl.derivatives(x)[1]
 
-    initial_alf = integrate.quad(dalf,
-                                 0,
-                                 np.abs(pitching_delay_time_fraction) /
-                                 flapping_wing_frequency,
-                                 epsabs=int_precision)[0]
+    initial_alf = dalf_spl.integral(
+        0,
+        np.abs(pitching_delay_time_fraction) / flapping_wing_frequency)
     initial_alf = -np.sign(pitching_delay_time_fraction) * initial_alf
 
     def alf(x):
         """pitching motion function"""
-        T = 1 / flapping_wing_frequency
-        delay = pitching_delay_time_fraction * T
-        tr = pitching_time_fraction * T
-        beta = 1 - (2 * tr / T)
-
-        t_T1 = 0 + delay
-        t_T2 = (T * (1 - beta) / 4) + delay
-        t_T3 = (T * (1 + beta) / 4) + delay
-        t_T4 = (T * (3 - beta) / 4) + delay
-        t_T5 = (T * (3 + beta) / 4) + delay
-        t_T6 = T + delay
-        points = [t_T1, t_T2, t_T3, t_T4, t_T5, t_T6]
-
-        alfx = initial_alf + integrate.quad(
-            dalf, 0, x, points=points, epsabs=int_precision)[0]
-        return alfx
+        return initial_alf + dalf_spl.integral(0, x)
 
     kinematic_angles = []
     t_1st_cycle = [t1 for t1 in t if t1 <= 1 / flapping_wing_frequency]
@@ -453,7 +430,8 @@ def smooth_linear_ramp(t, kinematic_parameters):
             omegax = (ramp_stage_acceleration / 2) / smooth_factor * (
                 logcosh(f_t0) - logcosh(f_t1) + logcosh(f_t3) - logcosh(f_t2))
         else:
-            if bstroke == 'yes':
+            if bstroke == 'yes' and x <= 2 * (end_ramp_end_time +
+                                              ramp_constant_time):
                 x -= end_ramp_end_time + ramp_constant_time
                 f_t0 = smooth_factor * (x - ramp_start_time)
                 f_t1 = smooth_factor * (x - i_ramp_end_time)
@@ -476,58 +454,35 @@ def smooth_linear_ramp(t, kinematic_parameters):
     omega_print = steady_rotation_omega * np.pi / 180
     print('steady revolving omega = %s' % omega_print)
 
+    dphi_data = []
+    for ti in t:
+        dphi_data.append(omega(ti))
+    dphi_spl = UnivariateSpline(t, dphi_data, s=0)
+
     def ddphi(x):
         """flapping angular acceleration function"""
-        return derivative(omega, x, dx=1e-6)
+        return dphi_spl.derivatives(x)[1]
 
-    ramp_angle = integrate.quad(omega,
-                                ramp_start_time - ramp_constant_time,
-                                i_ramp_end_time,
-                                epsabs=int_precision)[0] * np.pi / 180
-
+    ramp_angle = dphi_spl.integral(0, i_ramp_end_time)
     print('initial linear ramp angle = %s' % ramp_angle)
 
     if ramp_mode == 'with_end_acc':
-        end_ramp_angle = integrate.quad(omega,
-                                        steady_end_time,
-                                        end_ramp_end_time + ramp_constant_time,
-                                        epsabs=int_precision)[0] * np.pi / 180
-
+        end_ramp_angle = dphi_spl.integral(
+            steady_end_time, end_ramp_end_time + ramp_constant_time)
         print('end linear ramp angle = %s' % end_ramp_angle)
 
-    stroke_angle = integrate.quad(omega,
-                                  ramp_start_time - ramp_constant_time,
-                                  end_ramp_end_time + ramp_constant_time,
-                                  epsabs=int_precision)[0]
-
+    stroke_angle = dphi_spl.integral(0, end_ramp_end_time + ramp_constant_time)
     st_dist = np.abs(stroke_angle) * np.pi / 180 * section_location
     print('2d wing travel distance = %s' % st_dist)
 
     def phi(x):
         """rotation angle function"""
-        if ramp_start_time - ramp_constant_time <= x <= end_ramp_end_time + ramp_constant_time:
-            phi_out = integrate.quad(omega,
-                                     ramp_start_time - ramp_constant_time,
-                                     x,
-                                     epsabs=int_precision)[0]
-
-        elif x < ramp_start_time - ramp_constant_time:
-            phi_out = 0
-        elif x > end_ramp_end_time + ramp_constant_time:
-            if bstroke == 'yes':
-                phi_out = stroke_angle + integrate.quad(
-                    omega,
-                    end_ramp_end_time + ramp_constant_time,
-                    x,
-                    epsabs=int_precision)[0]
-            else:
-                phi_out = stroke_angle
-
-        return phi_out
+        return dphi_spl.integral(0, x)
 
     #--pitching motion functions--
     if pitch_mode == 'with_end_pitch':
-        pitch_delay_time = pitch_time * pitch_delay_time_fraction
+        pitch_delay_time = (pitch_time +
+                            2 * ramp_constant_time) * pitch_delay_time_fraction
         pitch_acc_time = pitch_time * pitch_acc_time_fraction / 2
 
         pitch_start_time = end_ramp_end_time - pitch_time + pitch_delay_time
@@ -551,10 +506,13 @@ def smooth_linear_ramp(t, kinematic_parameters):
 
             return dalfx
 
-        pitch_angle = integrate.quad(dalf,
-                                     pitch_start_time - ramp_constant_time,
-                                     pitch_end_time + ramp_constant_time,
-                                     epsabs=int_precision)[0]
+        dalf_data = []
+        for ti in t:
+            dalf_data.append(dalf(ti))
+        dalf_spl = UnivariateSpline(t, dalf_data, s=0)
+
+        pitch_angle = dalf_spl.integral(pitch_start_time - ramp_constant_time,
+                                        pitch_end_time + ramp_constant_time)
 
         print('wing pitch angle = %s' % np.abs(pitch_angle))
 
@@ -564,22 +522,11 @@ def smooth_linear_ramp(t, kinematic_parameters):
 
         def ddalf(x):
             """flapping angular acceleration function"""
-            return derivative(dalf, x, dx=1e-6)
+            return dalf_spl.derivatives(x)[1]
 
         def alf(x):
             """rotation angle function"""
-            if pitch_start_time - ramp_constant_time <= x <= pitch_end_time + ramp_constant_time:
-                alf_out = integrate.quad(dalf,
-                                         pitch_start_time - ramp_constant_time,
-                                         x,
-                                         epsabs=int_precision)[0]
-
-            elif x < pitch_start_time - ramp_constant_time:
-                alf_out = 0
-            elif x > pitch_end_time + ramp_constant_time:
-                alf_out = pitch_angle
-
-            return alf_out
+            return dalf_spl.integral(0, x)
 
     kinematic_angles = []
     for ti in t:

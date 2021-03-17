@@ -16,13 +16,14 @@ output_dir = '2d_kinematic_cases'
 ramp_function = 'smooth_linear_ramp'
 ramp_mode = 'with_end_acc'
 pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
+bstroke = 'yes'  #--with back stroke motion--
 section_location = 1  #used only for 2d cases
 start_time = 0
-end_time = 2.6
+end_time = 2.1
 #--------------------------------------------
 ramp_constant_time = 0.02
 pitch_acc_time_fraction = 0.5  #--relative to pitch time: 0 ~ 1
-pitch_delay_time_fraction = 0
+pitch_delay_time_fraction = 0.5
 #-conner smoothing parameter, higher indicates shorter smooth range--
 smooth_factor = 100
 #------------------------------------------
@@ -56,9 +57,7 @@ for case in parameters_arr:
         initial_ramp_time = ramp_time + ramp_constant_time
         # end_constant_time = end_time - 2 * initial_ramp_time - steady_rotation_time
 
-    time_series_length = int(
-        np.ceil((end_time - start_time) / time_step_increment))
-    t = np.linspace(start_time, end_time, time_series_length)
+    t = np.arange(start_time, end_time, time_step_increment)
 
     i_ramp_end_time = start_time + initial_ramp_time
     steady_end_time = i_ramp_end_time + steady_rotation_time
@@ -74,7 +73,7 @@ for case in parameters_arr:
             steady_end_time, end_ramp_end_time, smooth_factor, ramp_mode,
             ramp_constant_time, pitch_mode, pitch_time,
             pitch_delay_time_fraction, pitch_acceleration,
-            pitch_acc_time_fraction, section_location
+            pitch_acc_time_fraction, section_location, bstroke
         ]
         kinematic_angles = smooth_linear_ramp(t, kinematic_parameters)
 

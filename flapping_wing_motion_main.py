@@ -9,9 +9,9 @@ from kinematics_write import kf_plotter, write_2d, write_3d, write_iaoa, write_m
 # sinumation time definition and choose functions to use
 time_series_length_per_cycle = 1501
 start_time = 0
-number_of_cycles = 5
-use_function = 'smooth'
-# use_function = 'sinu_continuous'
+number_of_cycles = 1
+# use_function = 'smooth'
+use_function = 'sinu_continuous'
 # use_function = 'sinusoidal'
 
 # ----------------------------------------------
@@ -21,7 +21,7 @@ flapping_wing_frequency = 1
 flapping_delay_time_fraction = 0
 pitching_delay_time_fraction = 0
 
-section_location = 1
+section_location = 3
 # ----------------------------------------------
 # additional kinematic parameters for smooth functions
 half_flapping_amplitude = -80
@@ -35,7 +35,7 @@ ptf_coefficient = 1.6  # used when pitching_time_coefficient = 'f'
 flapping_acceleration_time_fraction = 0.25
 pitching_time_fraction = 0.25
 
-flapping_angular_velocity_amplitude = -402.66 * flapping_wing_frequency  # --degree/s--
+flapping_angular_velocity_amplitude = 140.04 * flapping_wing_frequency # --degree/s--
 pitching_angular_velocity_amplitude = 360 * flapping_wing_frequency / (
     2 * pitching_time_fraction)  # --degree/s--
 # ---------------------------------------------
