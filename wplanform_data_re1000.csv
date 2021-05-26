@@ -1,0 +1,6 @@
+t/c = 0.05
+Thickness = 3 mm
+flapping amplitude = 160 degree
+Medium_or_frequency = 1
+Re, aspect_ratio, root_offset, r1_h_design, r1_hat, r2_hat, r3_hat, R (mm), R_total (mm), flapping_frequency (Hz), kinematic_viscosity (m^2/s), S (m^2), ref_vel_Ur2 (m/s), max.force (N), max.moment (Nmm)
+1000, 3.0, 0.0, 0.5, 0.4999999981509327, 0.5592807586230594, 0.6029415289484117, 180.0, 180.0, 1, 3.3735020593619124e-05, 0.010797381488683469, 0.5622503432269854, 0.010886203289174569, 1.1814739300112655

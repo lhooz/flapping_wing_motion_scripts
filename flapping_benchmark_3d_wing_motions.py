@@ -10,17 +10,17 @@ from kinematic_functions import sinu_continuous_kinematic_function as sic_f
 from kinematic_functions import smooth_linear_ramp
 from kinematics_write import kf_plotter, write_3d
 
-parameters_file_name = 'wplanform_data'
+parameters_file_name = 'wplanform_data_re100'
 output_dir = '3dbm_kinematic_cases'
 # sinumation time definition and choose ramp functions to use
-pitching_wave_form = [0.125, 0.25, 0.5]
+pitching_wave_form = [0.25]
 time_series_length_per_cycle = 1501
 start_time = 0
 number_of_cycles = 6
 use_function = 'sinu_continuous'
 flapping_delay_time_fraction = 0
 pitching_delay_time_fraction = 0
-flapping_acceleration_time_fraction = 0.5
+flapping_acceleration_time_fraction = 0.25
 #----------------------------------------
 cwd = os.getcwd()
 output_dir_path = os.path.join(cwd, output_dir)
@@ -33,8 +33,10 @@ parameters_arr = read_planning_parameters_csv(parameters_file)
 for pitch_tf in pitching_wave_form:
     pitching_time_fraction = pitch_tf
     for case in parameters_arr:
+        Ro = case[5] * (case[1] + case[2])
         file_name = 'ar' + str(case[1]) + '_ofs' + str(case[2]) + '_r1h' + str(
-            case[3]) + '__Re' + str(case[0]) + '_pt' + str(pitch_tf)
+            case[3]) + '__Re' + str(
+                case[0]) + '_pt' + str(pitch_tf) + '_Ro' + '{0:.2f}'.format(Ro)
         save_file_data = os.path.join(output_dir_path, file_name + '.dat')
         save_file_image = os.path.join(output_dir_path, file_name + '.png')
         save_file_cf = os.path.join(output_dir_path, file_name + '.cf')
@@ -46,7 +48,7 @@ for pitch_tf in pitching_wave_form:
         ref_area = case[11]
         ref_vel = case[12]
 
-        flapping_angular_velocity_amplitude = 502.66 * flapping_wing_frequency  # --degree/s--
+        flapping_angular_velocity_amplitude = 391.06 * flapping_wing_frequency  # --degree/s--
         pitching_angular_velocity_amplitude = 360 * flapping_wing_frequency / (
             2 * pitching_time_fraction)  # --degree/s--
         t1 = np.linspace(start_time, 1 / flapping_wing_frequency,

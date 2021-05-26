@@ -7,9 +7,9 @@ from kinematic_functions import sinusoidal_kinematic_function as si_f
 from kinematics_write import kf_plotter, write_2d, write_3d, write_iaoa, write_max_dphi
 
 # sinumation time definition and choose functions to use
-time_series_length_per_cycle = 1501
+time_series_length_per_cycle = 5001
 start_time = 0
-number_of_cycles = 1
+number_of_cycles = 5
 # use_function = 'smooth'
 use_function = 'sinu_continuous'
 # use_function = 'sinusoidal'
@@ -32,10 +32,11 @@ pitching_time_coefficient = 'f'  # between 0 and inf or use ptf_function 'f'
 ptf_coefficient = 1.6  # used when pitching_time_coefficient = 'f'
 # ----------------------------------------------
 # additional kinematic control parameters for sinu_continuous functions
-flapping_acceleration_time_fraction = 0.25
-pitching_time_fraction = 0.25
+flapping_acceleration_time_fraction = 0.125
+pitching_time_fraction = 0.125
 
-flapping_angular_velocity_amplitude = 140.04 * flapping_wing_frequency # --degree/s--
+# flapping_angular_velocity_amplitude = 391.06 * flapping_wing_frequency / 360 * 4000  # --degree/s-- used for exp--
+flapping_angular_velocity_amplitude = 391.06 * flapping_wing_frequency  # --degree/s--
 pitching_angular_velocity_amplitude = 360 * flapping_wing_frequency / (
     2 * pitching_time_fraction)  # --degree/s--
 # ---------------------------------------------
@@ -77,16 +78,26 @@ elif use_function == 'sinu_continuous':
     kinematic_angles = sic_f(t, kinematic_parameters_sinu_continuous)
 elif use_function == 'sinusoidal':
     kinematic_angles = si_f(t, kinematic_parameters_sinusoidal)
+kinematic_angles = np.array(kinematic_angles)
+
+#----------------save file name-----------
+fAmp = np.abs(
+    np.amax(kinematic_angles[:, 0]) - np.amin(kinematic_angles[:, 0]))
+save_file_name = 'phi' + '{0:.0f}'.format(fAmp) + '_at' + '{0:.3g}'.format(
+    flapping_acceleration_time_fraction) + '_pt' + '{0:.3g}'.format(
+        pitching_time_fraction)
+#-----------------------------------------
 
 # plotting kinematic angles
 angles_to_plot = ['dphi', 'dalf']
 # angles_to_plot = ['dphi', 'ddphi']
-
+#----------------------------------------------------------------------
 kf_plotter(t, kinematic_angles, angles_to_plot, time_series_length_per_cycle,
-           'against_t', 'current')
+           'against_t', save_file_name + '.png')
 # ----------------------------------------------
 write_2d(t, section_location, kinematic_angles, time_series_length_per_cycle,
-         'current')
-write_3d(t, kinematic_angles, time_series_length_per_cycle, 'current')
+         save_file_name + '_2d.dat')
+write_3d(t, kinematic_angles, time_series_length_per_cycle,
+         save_file_name + '_3d.dat')
 write_iaoa(kinematic_angles)
 write_max_dphi(kinematic_angles)

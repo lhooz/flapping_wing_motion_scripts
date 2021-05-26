@@ -392,7 +392,6 @@ def sinu_ramp_rev(t, kinematic_parameters):
 #---linear ramp function smoothed at conner for revolving or 2d translating wing--
 def smooth_linear_ramp(t, kinematic_parameters):
     """smoothed linear ramp function"""
-    int_precision = 1e-12
     ramp_stage_acceleration = kinematic_parameters[0]
     ramp_start_time = kinematic_parameters[1]
     i_ramp_end_time = kinematic_parameters[2]
@@ -417,7 +416,38 @@ def smooth_linear_ramp(t, kinematic_parameters):
 
     def omega(x):
         """linear ramp rotation speed function"""
-        if ramp_start_time - ramp_constant_time <= x <= end_ramp_end_time + ramp_constant_time:
+        # if ramp_start_time - ramp_constant_time <= x <= end_ramp_end_time + ramp_constant_time:
+        # f_t0 = smooth_factor * (x - ramp_start_time)
+        # f_t1 = smooth_factor * (x - i_ramp_end_time)
+        # if ramp_mode == 'with_end_acc':
+        # f_t2 = smooth_factor * (x - steady_end_time)
+        # f_t3 = smooth_factor * (x - end_ramp_end_time)
+        # elif ramp_mode == 'no_end_acc':
+        # f_t2 = smooth_factor * ramp_start_time
+        # f_t3 = smooth_factor * i_ramp_end_time
+
+        # omegax = (ramp_stage_acceleration / 2) / smooth_factor * (
+        # logcosh(f_t0) - logcosh(f_t1) + logcosh(f_t3) - logcosh(f_t2))
+        # else:
+        # if bstroke == 'yes' and x <= 2 * (end_ramp_end_time +
+        # ramp_constant_time):
+        # x -= end_ramp_end_time + ramp_constant_time
+        # f_t0 = smooth_factor * (x - ramp_start_time)
+        # f_t1 = smooth_factor * (x - i_ramp_end_time)
+        # if ramp_mode == 'with_end_acc':
+        # f_t2 = smooth_factor * (x - steady_end_time)
+        # f_t3 = smooth_factor * (x - end_ramp_end_time)
+        # elif ramp_mode == 'no_end_acc':
+        # f_t2 = smooth_factor * ramp_start_time
+        # f_t3 = smooth_factor * i_ramp_end_time
+
+        # omegax = -(ramp_stage_acceleration / 2) / smooth_factor * (
+        # logcosh(f_t0) - logcosh(f_t1) + logcosh(f_t3) -
+        # logcosh(f_t2))
+        # else:
+        # omegax = 0
+
+        if bstroke == 'no':
             f_t0 = smooth_factor * (x - ramp_start_time)
             f_t1 = smooth_factor * (x - i_ramp_end_time)
             if ramp_mode == 'with_end_acc':
@@ -429,9 +459,23 @@ def smooth_linear_ramp(t, kinematic_parameters):
 
             omegax = (ramp_stage_acceleration / 2) / smooth_factor * (
                 logcosh(f_t0) - logcosh(f_t1) + logcosh(f_t3) - logcosh(f_t2))
+
         else:
-            if bstroke == 'yes' and x <= 2 * (end_ramp_end_time +
-                                              ramp_constant_time):
+            if x <= end_ramp_end_time + ramp_constant_time:
+                f_t0 = smooth_factor * (x - ramp_start_time)
+                f_t1 = smooth_factor * (x - i_ramp_end_time)
+                if ramp_mode == 'with_end_acc':
+                    f_t2 = smooth_factor * (x - steady_end_time)
+                    f_t3 = smooth_factor * (x - end_ramp_end_time)
+                elif ramp_mode == 'no_end_acc':
+                    f_t2 = smooth_factor * ramp_start_time
+                    f_t3 = smooth_factor * i_ramp_end_time
+
+                omegax = (ramp_stage_acceleration /
+                          2) / smooth_factor * (logcosh(f_t0) - logcosh(f_t1) +
+                                                logcosh(f_t3) - logcosh(f_t2))
+
+            else:
                 x -= end_ramp_end_time + ramp_constant_time
                 f_t0 = smooth_factor * (x - ramp_start_time)
                 f_t1 = smooth_factor * (x - i_ramp_end_time)
@@ -445,8 +489,6 @@ def smooth_linear_ramp(t, kinematic_parameters):
                 omegax = -(ramp_stage_acceleration / 2) / smooth_factor * (
                     logcosh(f_t0) - logcosh(f_t1) + logcosh(f_t3) -
                     logcosh(f_t2))
-            else:
-                omegax = 0
 
         return omegax
 
@@ -492,18 +534,24 @@ def smooth_linear_ramp(t, kinematic_parameters):
 
         def dalf(x):
             """linear ramp pitch speed function"""
-            if pitch_start_time - ramp_constant_time <= x <= pitch_end_time + ramp_constant_time:
-                f_t0 = smooth_factor * (x - pitch_start_time)
-                f_t1 = smooth_factor * (x - p_acc_end_time)
-                f_t2 = smooth_factor * (x - p_decc_start_time)
-                f_t3 = smooth_factor * (x - pitch_end_time)
+            # if pitch_start_time - ramp_constant_time <= x <= pitch_end_time + ramp_constant_time:
+            # f_t0 = smooth_factor * (x - pitch_start_time)
+            # f_t1 = smooth_factor * (x - p_acc_end_time)
+            # f_t2 = smooth_factor * (x - p_decc_start_time)
+            # f_t3 = smooth_factor * (x - pitch_end_time)
 
-                dalfx = (pitch_acceleration /
-                         2) / smooth_factor * (logcosh(f_t0) - logcosh(f_t1) +
-                                               logcosh(f_t3) - logcosh(f_t2))
-            else:
-                dalfx = 0
+            # dalfx = (pitch_acceleration /
+            # 2) / smooth_factor * (logcosh(f_t0) - logcosh(f_t1) +
+            # logcosh(f_t3) - logcosh(f_t2))
+            # else:
+            # dalfx = 0
+            f_t0 = smooth_factor * (x - pitch_start_time)
+            f_t1 = smooth_factor * (x - p_acc_end_time)
+            f_t2 = smooth_factor * (x - p_decc_start_time)
+            f_t3 = smooth_factor * (x - pitch_end_time)
 
+            dalfx = (pitch_acceleration / 2) / smooth_factor * (
+                logcosh(f_t0) - logcosh(f_t1) + logcosh(f_t3) - logcosh(f_t2))
             return dalfx
 
         dalf_data = []

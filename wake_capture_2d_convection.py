@@ -11,19 +11,19 @@ from kinematics_write import kf_plotter, write_2d
 
 time_step_increment = 1e-3
 parameters_file_name = '2d_case_parameters'
-output_dir = '2d_kinematic_cases'
+output_dir = '2d_convection_cases'
 # sinumation time definition and choose ramp functions to use
 ramp_function = 'smooth_linear_ramp'
 ramp_mode = 'with_end_acc'
 pitch_mode = 'with_end_pitch'  #--used when ramp mode with_end_acc
-bstroke = 'yes'  #--with back stroke motion--
+bstroke = 'no'  #--with back stroke motion--
 section_location = 1  #used only for 2d cases
 start_time = 0
 end_time = 2.1
 #--------------------------------------------
 ramp_constant_time = 0.02
 pitch_acc_time_fraction = 0.5  #--relative to pitch time: 0 ~ 1
-pitch_delay_time_fraction = 0.5
+pitch_delay_time_fraction = 0.0
 #-conner smoothing parameter, higher indicates shorter smooth range--
 smooth_factor = 100
 #------------------------------------------
