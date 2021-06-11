@@ -10,7 +10,7 @@ from kinematic_functions import sinu_continuous_kinematic_function as sic_f
 from kinematic_functions import smooth_linear_ramp
 from kinematics_write import kf_plotter, write_3d
 
-parameters_file_name = 'wplanform_data_re100'
+parameters_file_name = 'wplanform_data_re1000'
 output_dir = '3dbm_kinematic_cases'
 # sinumation time definition and choose ramp functions to use
 pitching_wave_form = [0.25]

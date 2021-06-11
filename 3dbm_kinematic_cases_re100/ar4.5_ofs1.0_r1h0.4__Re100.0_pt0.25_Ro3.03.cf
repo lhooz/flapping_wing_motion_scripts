@@ -1,0 +1,26 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+\*---------------------------------------------------------------------------*/
+forceCoeffs_object
+{
+    type forceCoeffs;
+    libs ("libforces.so");
+    patches (wing);
+
+    writeControl writeTime;
+
+    pName p;
+    Uname U;
+
+    rho rhoInf;
+    rhoInf 1;
+
+    log true;
+
+    CofR (0 0 0);
+    liftDir (1 0 0);
+    dragDir (0 0 1);
+    pitchAxis (0 1 0);
+    magUInf 1.015719853534684;
+    lRef 1;
+    Aref 0.016162703639632684;
+}
