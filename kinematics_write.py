@@ -296,6 +296,62 @@ def write_3d(t, kinematic_angles, time_series_length_per_cycle, save_file):
                 f.write("%s\n" % item)
 
 
+def write_exp(t, kinematic_angles, time_series_length_per_cycle, save_file):
+    """write kinematics data for experimental 3d wing motion"""
+    kinematic_angles = np.array(kinematic_angles)
+    time_series_length = len(t)
+
+    if time_series_length_per_cycle == 'basic':
+        no_of_points_per_cycle = time_series_length + 1
+    else:
+        no_of_points_per_cycle = time_series_length_per_cycle
+
+        initial_phi = kinematic_angles[0][0]
+        initial_alf = kinematic_angles[0][1]
+        for i in range(no_of_points_per_cycle):
+            kinematic_angles[i][0] = kinematic_angles[i][0] - initial_phi
+            kinematic_angles[i][1] = kinematic_angles[i][1] - initial_alf
+
+    t_disp = []
+    r_angle = []
+    for i in range(time_series_length):
+        i_moded = np.mod(i, no_of_points_per_cycle - 1)
+
+        t_dispi = ['0', '0', '0']
+        t_disp.append(t_dispi)
+
+        #----------------------------------------------------
+        pitch_anglei = kinematic_angles[i_moded][1]
+
+        kinematic_anglesi = [kinematic_angles[i_moded][0], pitch_anglei, 0]
+
+        # roti = R.from_euler('XYZ', kinematic_anglesi, degrees=True)
+        # r_anglei = roti.as_euler('XYZ', degrees=True)
+        r_anglei = kinematic_anglesi
+        r_anglei = [
+            '{0:.10g}'.format(r_anglei[0]), '{0:.10g}'.format(r_anglei[1]),
+            '{0:.10g}'.format(r_anglei[2])
+        ]
+
+        r_angle.append(r_anglei)
+
+    t = ['{0:.10g}'.format(ti) for ti in t]
+    motion = []
+    for ti, angle_i in zip(t, r_angle):
+        motioni = ti + ',' + ','.join(angle_i)
+
+        motion.append(motioni)
+
+    if save_file == 'current':
+        with open('6DoF_exp.dat', 'w') as f:
+            for item in motion:
+                f.write("%s\n" % item)
+    else:
+        with open(save_file, 'w') as f:
+            for item in motion:
+                f.write("%s\n" % item)
+
+
 def write_iaoa(kinematic_angles):
     """write pitch angle at 1st step"""
 

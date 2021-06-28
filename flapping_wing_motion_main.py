@@ -1,22 +1,24 @@
 """script for tabulated 6DOF flapping wing motion"""
 
 import numpy as np
-from kinematic_functions import smooth_kinematic_function as sm_f
+
 from kinematic_functions import sinu_continuous_kinematic_function as sic_f
 from kinematic_functions import sinusoidal_kinematic_function as si_f
-from kinematics_write import kf_plotter, write_2d, write_3d, write_iaoa, write_max_dphi
+from kinematic_functions import smooth_kinematic_function as sm_f
+from kinematics_write import (kf_plotter, write_2d, write_3d, write_exp,
+                              write_iaoa, write_max_dphi)
 
 # sinumation time definition and choose functions to use
-time_series_length_per_cycle = 1001
+time_series_length_per_cycle = 5001
 start_time = 0
-number_of_cycles = 5
-use_function = 'smooth'
-# use_function = 'sinu_continuous'
+number_of_cycles = 2
+# use_function = 'smooth'
+use_function = 'sinu_continuous'
 # use_function = 'sinusoidal'
 
 # ----------------------------------------------
 # common kinematic parameters
-flapping_wing_frequency = 1
+flapping_wing_frequency = 0.2
 
 flapping_delay_time_fraction = 0
 pitching_delay_time_fraction = 0
@@ -35,7 +37,6 @@ ptf_coefficient = 1.6  # used when pitching_time_coefficient = 'f'
 flapping_acceleration_time_fraction = 0.125
 pitching_time_fraction = 0.125
 
-# flapping_angular_velocity_amplitude = 391.06 * flapping_wing_frequency / 360 * 4000  # --degree/s-- used for exp--
 flapping_angular_velocity_amplitude = 391.06 * flapping_wing_frequency  # --degree/s--
 pitching_angular_velocity_amplitude = 360 * flapping_wing_frequency / (
     2 * pitching_time_fraction)  # --degree/s--
@@ -83,13 +84,19 @@ kinematic_angles = np.array(kinematic_angles)
 #----------------save file name-----------
 fAmp = np.abs(
     np.amax(kinematic_angles[:, 0]) - np.amin(kinematic_angles[:, 0]))
-# save_file_name = use_function + '_phi' + '{0:.0f}'.format(fAmp) + '_at' + '{0:.3g}'.format(
-# flapping_acceleration_time_fraction) + '_pt' + '{0:.3g}'.format(
-# pitching_time_fraction)
-save_file_name = use_function + '_phi' + '{0:.0f}'.format(
-    fAmp) + '_atf' + '{0:.3g}'.format(
-        flapping_acceleration_time_coefficient) + '_ptc' + '{0:.3g}'.format(
-            pitching_time_coefficient)
+if use_function == 'sinu_continuous':
+    save_file_name = use_function + '_phi' + '{0:.0f}'.format(
+        fAmp) + '_at' + '{0:.3g}'.format(
+            flapping_acceleration_time_fraction) + '_pt' + '{0:.3g}'.format(
+                pitching_time_fraction)
+elif use_function == 'smooth':
+    save_file_name = use_function + '_phi' + '{0:.0f}'.format(
+        fAmp) + '_atf' + '{0:.3g}'.format(
+            flapping_acceleration_time_coefficient
+        ) + '_ptc' + '{0:.3g}'.format(pitching_time_coefficient)
+else:
+    save_file_name == 'current'
+
 #-----------------------------------------
 
 # plotting kinematic angles
@@ -103,5 +110,7 @@ write_2d(t, section_location, kinematic_angles, time_series_length_per_cycle,
          save_file_name + '_2d.dat')
 write_3d(t, kinematic_angles, time_series_length_per_cycle,
          save_file_name + '_3d.dat')
+write_exp(t, kinematic_angles, time_series_length_per_cycle,
+          save_file_name + '_exp.csv')
 write_iaoa(kinematic_angles)
 write_max_dphi(kinematic_angles)
